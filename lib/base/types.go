@@ -18,8 +18,8 @@ type FeatureCollection2 geojson.FeatureCollection
 type Point []float64
 
 type Location struct {
-	Longitude float64
-	Latitude  float64
+	Longitude float64 `json:"lng"`
+	Latitude  float64 `json:"lat"`
 }
 
 type BoundingBox []float64

@@ -32,27 +32,27 @@ type Base struct {
 
 // NewBase Create a new API base instance
 func NewBase(token string) *Base {
-	m := &Base{}
+	b := &Base{}
 
-	m.token = token
+	b.token = token
 
-	return m
+	return b
 }
 
-func (m *Base) SetDebug(debug bool) {
-	m.debug = true
+func (b *Base) SetDebug(debug bool) {
+	b.debug = true
 }
 
 // Query the mapbox API
-func (m *Base) Query(api, version, mode, query string, v *url.Values, inst interface{}) error {
+func (b *Base) QueryBase(query string, v *url.Values, inst interface{}) error {
 
 	// Add token to args
-	v.Set("access_token", m.token)
+	v.Set("access_token", b.token)
 
 	// Generate URL
-	url := fmt.Sprintf("%s/%s/%s/%s/%s", BaseURL, api, version, mode, query)
+	url := fmt.Sprintf("%s/%s", BaseURL, query)
 
-	if m.debug {
+	if b.debug {
 		fmt.Printf("URL: %s\n", url)
 	}
 
@@ -71,7 +71,7 @@ func (m *Base) Query(api, version, mode, query string, v *url.Values, inst inter
 		return err
 	}
 
-	if m.debug {
+	if b.debug {
 		data, _ := httputil.DumpRequest(request, true)
 		fmt.Printf("Request: %s", string(data))
 		data, _ = httputil.DumpResponse(resp, true)
@@ -92,4 +92,13 @@ func (m *Base) Query(api, version, mode, query string, v *url.Values, inst inter
 	}
 
 	return nil
+}
+
+// Query the mapbox API
+func (b *Base) Query(api, version, mode, query string, v *url.Values, inst interface{}) error {
+
+	// Generate URL
+	queryString := fmt.Sprintf("%s/%s/%s/%s", api, version, mode, query)
+
+	return b.QueryBase(queryString, v, inst)
 }
