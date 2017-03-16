@@ -13,11 +13,13 @@ import (
 	"github.com/ryankurte/go-mapbox/lib/base"
 	"github.com/ryankurte/go-mapbox/lib/directions"
 	"github.com/ryankurte/go-mapbox/lib/geocode"
+	"github.com/ryankurte/go-mapbox/lib/maps"
 )
 
 // Mapbox API Wrapper structure
 type Mapbox struct {
 	base       *base.Base
+	Maps       *maps.Maps
 	Geocode    *geocode.Geocode
 	Directions *directions.Directions
 }
@@ -30,6 +32,7 @@ func NewMapbox(token string) *Mapbox {
 	m.base = base.NewBase(token)
 
 	// Bind modules
+	m.Maps = maps.NewMaps(m.base)
 	m.Geocode = geocode.NewGeocode(m.base)
 	m.Directions = directions.NewDirections(m.base)
 
