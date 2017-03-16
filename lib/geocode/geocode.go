@@ -1,3 +1,12 @@
+/**
+ * go-mapbox Geocoding Module
+ * Wraps the mapbox geocoding API for server side use
+ * See https://www.mapbox.com/api-documentation/#geocoding for API information
+ *
+ * https://github.com/ryankurte/go-mapbox
+ * Copyright 2017 Ryan Kurte
+ */
+
 package geocode
 
 import (
@@ -49,12 +58,12 @@ func NewGeocode(base *base.Base) *Geocode {
 
 // ForwardRequestOpts request options fo forward geocoding
 type ForwardRequestOpts struct {
-	Country      string
-	Proximity    base.Location
-	Types        []Type
-	Autocomplete bool
-	BBox         base.BoundingBox
-	Limit        uint
+	Country      string           `url:"country,omitempty"`
+	Proximity    []float64        `url:"proximity,omitempty"`
+	Types        []Type           `url:"types,omitempty"`
+	Autocomplete bool             `url:"autocomplete,omitempty"`
+	BBox         base.BoundingBox `url:"bbox,omitempty"`
+	Limit        uint             `url:"limit,omitempty"`
 }
 
 // ForwardResponse is the response from a forward geocode lookup
@@ -74,7 +83,9 @@ func (g *Geocode) Forward(place string, req *ForwardRequestOpts) (*ForwardRespon
 
 	resp := ForwardResponse{}
 
-	err = g.base.Query(apiName, apiVersion, apiMode, strings.Replace(place, " ", "+", -1), &v, &resp)
+	queryString := strings.Replace(place, " ", "+", -1)
+
+	err = g.base.Query(apiName, apiVersion, apiMode, fmt.Sprintf("%s.json", queryString), &v, &resp)
 
 	return &resp, err
 }
@@ -102,9 +113,9 @@ func (g *Geocode) Reverse(loc *base.Location, req *ReverseRequestOpts) (*Reverse
 
 	resp := ReverseResponse{}
 
-	query := fmt.Sprintf("%f,%f", loc.Longitude, loc.Latitude)
+	queryString := fmt.Sprintf("%f,%f.json", loc.Longitude, loc.Latitude)
 
-	err = g.base.Query(apiName, apiVersion, apiMode, query, &v, &resp)
+	err = g.base.Query(apiName, apiVersion, apiMode, queryString, &v, &resp)
 
 	return &resp, err
 }

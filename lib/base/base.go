@@ -1,9 +1,19 @@
+/**
+ * go-mapbox Base Module
+ * Provides a common base for API modules
+ * See https://www.mapbox.com/api-documentation/ for API information
+ *
+ * https://github.com/ryankurte/go-mapbox
+ * Copyright 2017 Ryan Kurte
+ */
+
 package base
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 )
 
@@ -17,6 +27,7 @@ const (
 // Base Mapbox API base
 type Base struct {
 	token string
+	debug bool
 }
 
 // NewBase Create a new API base instance
@@ -28,6 +39,10 @@ func NewBase(token string) *Base {
 	return m
 }
 
+func (m *Base) SetDebug(debug bool) {
+	m.debug = true
+}
+
 // Query the mapbox API
 func (m *Base) Query(api, version, mode, query string, v *url.Values, inst interface{}) error {
 
@@ -35,8 +50,11 @@ func (m *Base) Query(api, version, mode, query string, v *url.Values, inst inter
 	v.Set("access_token", m.token)
 
 	// Generate URL
-	url := fmt.Sprintf("%s/%s/%s/%s/%s.json", BaseURL, api, version, mode, query)
-	fmt.Printf("URL: %s\n", url)
+	url := fmt.Sprintf("%s/%s/%s/%s/%s", BaseURL, api, version, mode, query)
+
+	if m.debug {
+		fmt.Printf("URL: %s\n", url)
+	}
 
 	// Create request object
 	request, err := http.NewRequest(http.MethodGet, url, nil)
@@ -51,6 +69,13 @@ func (m *Base) Query(api, version, mode, query string, v *url.Values, inst inter
 	resp, err := client.Do(request)
 	if err != nil {
 		return err
+	}
+
+	if m.debug {
+		data, _ := httputil.DumpRequest(request, true)
+		fmt.Printf("Request: %s", string(data))
+		data, _ = httputil.DumpResponse(resp, true)
+		fmt.Printf("Response: %s", string(data))
 	}
 
 	if resp.StatusCode == statusRateLimitExceeded {

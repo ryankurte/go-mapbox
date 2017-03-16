@@ -1,3 +1,12 @@
+/**
+ * go-mapbox Base Module Errors
+ * Defines common errors returned by API modules
+ * See https://www.mapbox.com/api-documentation/ for API information
+ *
+ * https://github.com/ryankurte/go-mapbox
+ * Copyright 2017 Ryan Kurte
+ */
+
 package base
 
 import (

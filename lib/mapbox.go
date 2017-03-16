@@ -1,3 +1,12 @@
+/**
+ * go-mapbox Mapbox API Modle
+ * Wraps the mapbox APIs for golang server (or application) use
+ * See https://www.mapbox.com/api-documentation/for API information
+ *
+ * https://github.com/ryankurte/go-mapbox
+ * Copyright 2017 Ryan Kurte
+ */
+
 package mapbox
 
 import (

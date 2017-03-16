@@ -1,3 +1,12 @@
+/**
+ * go-mapbox Geocoding Module Tests
+ * Wraps the mapbox geocoding API for server side use
+ * See https://www.mapbox.com/api-documentation/#geocoding for API information
+ *
+ * https://github.com/ryankurte/go-mapbox
+ * Copyright 2017 Ryan Kurte
+ */
+
 package geocode
 
 import (
