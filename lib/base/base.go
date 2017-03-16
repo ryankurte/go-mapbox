@@ -39,13 +39,13 @@ func NewBase(token string) *Base {
 	return b
 }
 
+// SetDebug enables debug output for API calls
 func (b *Base) SetDebug(debug bool) {
 	b.debug = true
 }
 
-// Query the mapbox API
-func (b *Base) QueryBase(query string, v *url.Values, inst interface{}) error {
-
+// QueryRequest make a get with the provided query string and return the response if successful
+func (b *Base) QueryRequest(query string, v *url.Values) (*http.Response, error) {
 	// Add token to args
 	v.Set("access_token", b.token)
 
@@ -59,7 +59,7 @@ func (b *Base) QueryBase(query string, v *url.Values, inst interface{}) error {
 	// Create request object
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	request.URL.RawQuery = v.Encode()
 
@@ -68,21 +68,33 @@ func (b *Base) QueryBase(query string, v *url.Values, inst interface{}) error {
 
 	resp, err := client.Do(request)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if b.debug {
 		data, _ := httputil.DumpRequest(request, true)
 		fmt.Printf("Request: %s", string(data))
-		data, _ = httputil.DumpResponse(resp, true)
+		data, _ = httputil.DumpResponse(resp, false)
 		fmt.Printf("Response: %s", string(data))
 	}
 
 	if resp.StatusCode == statusRateLimitExceeded {
-		return ErrorAPILimitExceeded
+		return nil, ErrorAPILimitExceeded
 	}
 	if resp.StatusCode == http.StatusUnauthorized {
-		return ErrorAPIUnauthorized
+		return nil, ErrorAPIUnauthorized
+	}
+
+	return resp, nil
+}
+
+// QueryBase Query the mapbox API and fill the provided instance with the returned JSON
+// TODO: Rename this
+func (b *Base) QueryBase(query string, v *url.Values, inst interface{}) error {
+
+	resp, err := b.QueryRequest(query, v)
+	if err != nil {
+		return err
 	}
 
 	defer resp.Body.Close()
@@ -95,6 +107,7 @@ func (b *Base) QueryBase(query string, v *url.Values, inst interface{}) error {
 }
 
 // Query the mapbox API
+// TODO: Depreciate this
 func (b *Base) Query(api, version, mode, query string, v *url.Values, inst interface{}) error {
 
 	// Generate URL
