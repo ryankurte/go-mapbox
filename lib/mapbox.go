@@ -18,9 +18,12 @@ import (
 
 // Mapbox API Wrapper structure
 type Mapbox struct {
-	base       *base.Base
-	Maps       *maps.Maps
-	Geocode    *geocode.Geocode
+	base *base.Base
+	// Maps allows fetching of tiles and tilesets
+	Maps *maps.Maps
+	// Geocode allows forward (by address) and reverse (by lat/lng) geocoding
+	Geocode *geocode.Geocode
+	// Directions generates directions between arbitrary points
 	Directions *directions.Directions
 }
 
