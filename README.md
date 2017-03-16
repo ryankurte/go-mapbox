@@ -26,12 +26,9 @@ Very early WIP, pull requests and issues are most welcome. See [lib/geocode/](li
 ### Initialisation
 
 ```go
-// Import the core module and any required APIs
+// Import the core module (and any required APIs)
 import (
     "gopkg.in/ryankurte/go-mapbox.v0/lib"
-    "gopkg.in/ryankurte/go-mapbox.v0/lib/maps"
-    "gopkg.in/ryankurte/go-mapbox.v0/lib/geocode"
-    "gopkg.in/ryankurte/go-mapbox.v0/lib/directions"
 )
 
 // Fetch token from somewhere
