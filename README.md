@@ -18,10 +18,11 @@ Very early WIP, pull requests are most welcome. See [lib/geocode/](lib/geocode) 
 - [ ] Maps
 - [ ] Static
 - [ ] Datasets
+- [ ] Surface
 
 ## Layout
 
 - [lib/base](lib/base/) contains a common base for API modules
 - [lib/directions](lib/directions/) contains the directions API module
 - [lib/geocode](lib/geocode/) contains the geocoding API module
-
+- [lib/surface](lib/surface/) contains the surface API module
