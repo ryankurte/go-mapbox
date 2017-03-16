@@ -6,9 +6,11 @@ Mapbox API wrappers for Golang
 [![GitHub tag](https://img.shields.io/github/tag/ryankurte/go-mapbox.svg)](https://github.com/ryankurte/go-mapbox)
 [![Build Status](https://travis-ci.org/ryankurte/go-mapbox.svg?branch=master)](https://travis-ci.org/ryankurte/go-mapbox)
 
+See [here](https://golanglibs.com/top?q=mapbox) other golang/mapbox projects.
+
 ## Status
 
-Very early WIP, pull requests are most welcome. See [lib/geocode/](lib/geocode) or [lib/directions/](lib/directions) for an example module to mimic.
+Very early WIP, pull requests and issues are most welcome. See [lib/geocode/](lib/geocode) or [lib/directions/](lib/directions) for an example module to mimic.
 
 ### Modules
 
