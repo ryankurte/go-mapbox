@@ -194,15 +194,13 @@ func (m *Maps) StitchTiles(images [][]image.Image, configs [][]image.Config) ima
 
 	stitched := image.NewRGBA(image.Rect(0, 0, xSize, ySize))
 
-
 	for y, row := range images {
 		for x, img := range row {
-
 			sp := image.Point{x * imgX, y * imgY}
+			log.Printf("Stitching image (%d, %d) at position (%d, %d)", x, y, sp.X, sp.Y)
 			draw.Draw(stitched, img.Bounds(), img, sp, draw.Over)
 		}
 	}
-
 
 	return stitched
 }
