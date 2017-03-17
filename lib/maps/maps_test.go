@@ -21,7 +21,7 @@ import (
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
-func TestMapsr(t *testing.T) {
+func TestMaps(t *testing.T) {
 
 	token := os.Getenv("MAPBOX_TOKEN")
 	if token == "" {
@@ -66,6 +66,30 @@ func TestMapsr(t *testing.T) {
 		}
 
 		f, err := os.Create("/tmp/go-mapbox-test.jpg")
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
+		w := bufio.NewWriter(f)
+
+		err = jpeg.Encode(w, img, nil)
+		if err != nil {
+			t.Error(err)
+		}
+
+		f.Close()
+	})
+
+	t.Run("Can fetch terrain RGB tiles", func(t *testing.T) {
+
+		img, err := maps.GetTiles(MapIDTerrainRGB, 1, 0, 0, MapFormatPngRaw, true)
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
+		f, err := os.Create("/tmp/go-mapbox-test-terrain.png")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()

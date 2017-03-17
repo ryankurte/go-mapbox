@@ -45,6 +45,9 @@ func (m *Maps) GetTiles(mapID MapID, x, y, z uint, format MapFormat, highDPI boo
 	if mapID == MapIDSatellite && strings.Contains(string(format), "png") {
 		return nil, fmt.Errorf("MapIDSatellite does not support png outputs")
 	}
+	if format == MapFormatPngRaw && mapID != MapIDTerrainRGB {
+		return nil, fmt.Errorf("MapFormatPngRaw only supported for MapIDTerrainRGB")
+	}
 
 	// Create Request
 	dpiFlag := ""
