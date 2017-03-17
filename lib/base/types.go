@@ -9,11 +9,6 @@
 
 package base
 
-import (
-	"github.com/ryankurte/go-geojson"
-)
-
-type FeatureCollection2 geojson.FeatureCollection
 
 type Point []float64
 

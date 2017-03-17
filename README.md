@@ -96,3 +96,7 @@ directions, err := mapBox.Directions.GetDirections(locs, directions.RoutingCycli
 - [lib/directions](lib/directions/) contains the directions API module
 - [lib/geocode](lib/geocode/) contains the geocoding API module
 
+---
+
+If you have any questions, comments, or suggestions, feel free to open an issue or a pull request.
+

@@ -21,7 +21,7 @@ import (
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
-func TestMapsr(t *testing.T) {
+func TestMaps(t *testing.T) {
 
 	token := os.Getenv("MAPBOX_TOKEN")
 	if token == "" {
@@ -30,12 +30,13 @@ func TestMapsr(t *testing.T) {
 	}
 
 	b := base.NewBase(token)
+	//b.SetDebug(true)
 
 	maps := NewMaps(b)
 
 	t.Run("Can fetch map tiles as png", func(t *testing.T) {
 
-		img, err := maps.GetTiles(MapIDStreets, 1, 0, 0, MapFormatPng, true)
+		img, _, err := maps.GetTiles(MapIDStreets, 1, 0, 1, MapFormatPng, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
@@ -59,13 +60,42 @@ func TestMapsr(t *testing.T) {
 
 	t.Run("Can fetch map tiles as jpeg", func(t *testing.T) {
 
-		img, err := maps.GetTiles(MapIDSatellite, 1, 0, 0, MapFormatJpg90, true)
+		img, _, err := maps.GetTiles(MapIDSatellite, 1, 0, 1, MapFormatJpg90, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
 
 		f, err := os.Create("/tmp/go-mapbox-test.jpg")
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
+		w := bufio.NewWriter(f)
+
+		err = jpeg.Encode(w, img, nil)
+		if err != nil {
+			t.Error(err)
+		}
+
+		f.Close()
+	})
+
+	t.Run("Can fetch map tiles by location", func(t *testing.T) {
+
+		locA := base.Location{-122.42, 20.78}
+		locB := base.Location{-77.03, 38.91}
+
+		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 4, MapFormatJpg90, true)
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
+		img := maps.StitchTiles(images, configs)
+
+		f, err := os.Create("/tmp/go-mapbox-stitch.jpg")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
