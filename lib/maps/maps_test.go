@@ -112,7 +112,7 @@ func TestMaps(t *testing.T) {
 		locA := base.Location{-45.942805, 166.568500}
 		locB := base.Location{-34.2186101, 183.4015517}
 
-		cache, err := NewFileCache("/tmp/cache")
+		cache, err := NewFileCache("/tmp/go-mapbox-cache")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
