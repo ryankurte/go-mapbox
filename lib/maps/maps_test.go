@@ -10,14 +10,12 @@
 package maps
 
 import (
-	"bufio"
-	"image/jpeg"
-	"image/png"
 	"os"
 	"testing"
 )
 
 import (
+	"fmt"
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
@@ -30,79 +28,111 @@ func TestMaps(t *testing.T) {
 	}
 
 	b := base.NewBase(token)
+	//b.SetDebug(true)
 
 	maps := NewMaps(b)
 
 	t.Run("Can fetch map tiles as png", func(t *testing.T) {
 
-		img, err := maps.GetTile(MapIDStreets, 1, 0, 0, MapFormatPng, true)
+		img, _, err := maps.GetTile(MapIDStreets, 1, 0, 1, MapFormatPng, true)
+
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
 
-		f, err := os.Create("/tmp/go-mapbox-test.png")
+		err = SaveImagePNG(img, "/tmp/go-mapbox-test.png")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
-
-		w := bufio.NewWriter(f)
-
-		err = png.Encode(w, img)
-		if err != nil {
-			t.Error(err)
-		}
-
-		f.Close()
 	})
 
 	t.Run("Can fetch map tiles as jpeg", func(t *testing.T) {
 
-		img, err := maps.GetTile(MapIDSatellite, 1, 0, 0, MapFormatJpg90, true)
+		img, _, err := maps.GetTile(MapIDSatellite, 1, 0, 1, MapFormatJpg90, true)
+
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
 
-		f, err := os.Create("/tmp/go-mapbox-test.jpg")
+		err = SaveImageJPG(img, "/tmp/go-mapbox-test.jpg")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
-
-		w := bufio.NewWriter(f)
-
-		err = jpeg.Encode(w, img, nil)
-		if err != nil {
-			t.Error(err)
-		}
-
-		f.Close()
 	})
 
 	t.Run("Can fetch terrain RGB tiles", func(t *testing.T) {
 
-		img, err := maps.GetTile(MapIDTerrainRGB, 1, 0, 0, MapFormatPngRaw, true)
+		img, _, err := maps.GetTile(MapIDTerrainRGB, 1, 0, 1, MapFormatPngRaw, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
 
-		f, err := os.Create("/tmp/go-mapbox-test-terrain.png")
+		err = SaveImagePNG(img, "/tmp/go-mapbox-terrain.png")
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+	})
+
+	t.Run("Can fetch map tiles by location", func(t *testing.T) {
+
+		locA := base.Location{-45.942805, 166.568500}
+		locB := base.Location{-34.2186101, 183.4015517}
+
+		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
+
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
 
-		w := bufio.NewWriter(f)
-
-		err = jpeg.Encode(w, img, nil)
-		if err != nil {
-			t.Error(err)
+		for y := range images {
+			for x := range images[y] {
+				SaveImageJPG(images[y][x], fmt.Sprintf("/tmp/go-mapbox-stitch-%d-%d.jpg", x, y))
+			}
 		}
 
-		f.Close()
+		img := StitchTiles(images, configs[0][0])
+
+		err = SaveImageJPG(img, "/tmp/go-mapbox-stitch.jpg")
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
+	})
+
+	t.Run("Can fetch map tiles by location (with cache)", func(t *testing.T) {
+
+		locA := base.Location{-45.942805, 166.568500}
+		locB := base.Location{-34.2186101, 183.4015517}
+
+		cache, err := NewFileCache("/tmp/go-mapbox-cache")
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
+		maps.SetCache(cache)
+
+		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		img := StitchTiles(images, configs[0][0])
+
+		err = SaveImageJPG(img, "/tmp/go-mapbox-stitch2.jpg")
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
 	})
 
 }

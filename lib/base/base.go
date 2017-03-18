@@ -44,6 +44,10 @@ func (b *Base) SetDebug(debug bool) {
 	b.debug = true
 }
 
+type MapboxApiMessage struct {
+	Message string
+}
+
 // QueryRequest make a get with the provided query string and return the response if successful
 func (b *Base) QueryRequest(query string, v *url.Values) (*http.Response, error) {
 	// Add token to args
