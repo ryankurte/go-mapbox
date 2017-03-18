@@ -36,8 +36,8 @@ func NewMaps(base *base.Base) *Maps {
 	return &Maps{base}
 }
 
-// GetTiles fetches the map tile for the specified location
-func (m *Maps) GetTiles(mapID MapID, x, y, z uint, format MapFormat, highDPI bool) (image.Image, error) {
+// GetTile fetches the map tile for the specified location
+func (m *Maps) GetTile(mapID MapID, x, y, z uint, format MapFormat, highDPI bool) (image.Image, error) {
 
 	v := url.Values{}
 

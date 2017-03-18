@@ -35,7 +35,7 @@ func TestMaps(t *testing.T) {
 
 	t.Run("Can fetch map tiles as png", func(t *testing.T) {
 
-		img, err := maps.GetTiles(MapIDStreets, 1, 0, 0, MapFormatPng, true)
+		img, err := maps.GetTile(MapIDStreets, 1, 0, 0, MapFormatPng, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
@@ -59,7 +59,7 @@ func TestMaps(t *testing.T) {
 
 	t.Run("Can fetch map tiles as jpeg", func(t *testing.T) {
 
-		img, err := maps.GetTiles(MapIDSatellite, 1, 0, 0, MapFormatJpg90, true)
+		img, err := maps.GetTile(MapIDSatellite, 1, 0, 0, MapFormatJpg90, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
@@ -83,7 +83,7 @@ func TestMaps(t *testing.T) {
 
 	t.Run("Can fetch terrain RGB tiles", func(t *testing.T) {
 
-		img, err := maps.GetTiles(MapIDTerrainRGB, 1, 0, 0, MapFormatPngRaw, true)
+		img, err := maps.GetTile(MapIDTerrainRGB, 1, 0, 0, MapFormatPngRaw, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
