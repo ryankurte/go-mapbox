@@ -2,11 +2,11 @@
 
 Mapbox API wrappers for Golang
 
-[![Documentation](https://img.shields.io/badge/docs-godoc-blue.svg)](https://godoc.org/github.com/ryankurte/go-mapbox)
+[![Documentation](https://img.shields.io/badge/docs-godoc-blue.svg)](https://godoc.org/github.com/ryankurte/go-mapbox/lib)
 [![GitHub tag](https://img.shields.io/github/tag/ryankurte/go-mapbox.svg)](https://github.com/ryankurte/go-mapbox)
 [![Build Status](https://travis-ci.org/ryankurte/go-mapbox.svg?branch=master)](https://travis-ci.org/ryankurte/go-mapbox)
 
-See [here](https://golanglibs.com/top?q=mapbox) other golang/mapbox projects.
+See [here](https://golanglibs.com/top?q=mapbox) for other golang/mapbox projects.
 
 ## Status
 
