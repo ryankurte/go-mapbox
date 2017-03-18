@@ -33,7 +33,7 @@ func TestDirections(t *testing.T) {
 	t.Run("Can Lookup Directions", func(t *testing.T) {
 		var opts RequestOpts
 
-		locs := []base.Location{{-122.42, 37.78}, {-77.03, 38.91}}
+		locs := []base.Location{{37.78, -122.42}, {38.91, -77.03}}
 
 		res, err := Directions.GetDirections(locs, RoutingCycling, &opts)
 		if err != nil {
