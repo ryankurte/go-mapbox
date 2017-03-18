@@ -13,17 +13,14 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"image/draw"
-	"image/jpeg"
-	"image/png"
+	_ "image/jpeg"
+	_ "image/png"
 	"io/ioutil"
-	"log"
 	"net/url"
 	"strings"
 )
 
 import (
-	"github.com/paulmach/go.geo"
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
@@ -61,7 +58,6 @@ func (m *Maps) GetTile(mapID MapID, x, y, z uint64, format MapFormat, highDPI bo
 		dpiFlag = "@2x"
 	}
 	queryString := fmt.Sprintf("%s/%s/%d/%d/%d%s.%s", apiVersion, mapID, z, x, y, dpiFlag, format)
-	log.Printf("Fetching tile (x: %d, y: %d, z: %d) query: %s", x, y, z, queryString)
 
 	resp, err := m.base.QueryRequest(queryString, &v)
 	if err != nil {
@@ -87,87 +83,40 @@ func (m *Maps) GetTile(mapID MapID, x, y, z uint64, format MapFormat, highDPI bo
 	}
 
 	// Load config
-	reader := bytes.NewReader(data)
-	var cfg image.Config
-	err = nil
-	switch contentType {
-	case "image/png":
-		cfg, err = png.DecodeConfig(reader)
-	case "image/jpg":
-		cfg, err = jpeg.DecodeConfig(reader)
-	case "image/jpeg":
-		cfg, err = jpeg.DecodeConfig(reader)
-	default:
-		return nil, nil, fmt.Errorf("Unrecognised Content-Type (%s)", contentType)
-	}
-
+	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// Convert to image
-	var img image.Image
-	reader = bytes.NewReader(data)
-	switch contentType {
-	case "image/png":
-		img, err = png.Decode(reader)
-	case "image/jpg":
-		img, err = jpeg.Decode(reader)
-	case "image/jpeg":
-		img, err = jpeg.Decode(reader)
-	default:
-		return nil, nil, fmt.Errorf("Unrecognised Content-Type (%s)", contentType)
+	img, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		return nil, nil, err
 	}
 
 	return img, &cfg, err
 }
 
+// GetEnclosingTiles fetches a 2d array of the tiles enclosing a given point
 func (m *Maps) GetEnclosingTiles(mapID MapID, a, b base.Location, level uint64, format MapFormat, highDPI bool) ([][]image.Image, [][]image.Config, error) {
 	// Convert to tile locations
-	aX, aY := geo.ScalarMercator.Project(a.Longitude, a.Latitude, level)
-	bX, bY := geo.ScalarMercator.Project(b.Longitude, b.Latitude, level)
-
-	log.Printf("aX: %d aY: %d bX: %d bY: %d", aX, aY, bX, bY)
-
-	var xStart, xEnd, yStart, yEnd int64
-	if bX >= aX {
-		xStart = int64(aX)
-		xEnd = int64(bX)
-	} else {
-		xStart = int64(bX)
-		xEnd = int64(aX)
-	}
-	xLen := xEnd - xStart
-
-	if bY >= aY {
-		yStart = int64(aY)
-		yEnd = int64(bY)
-	} else {
-		yStart = int64(bY)
-		yEnd = int64(aY)
-	}
-	yLen := yEnd - yStart
-
-	log.Printf("X (start: %d end: %d len: %d) Y (start: %d end: %d len: %d)", xStart, xEnd, xLen, yStart, yEnd, yLen)
-
-	log.Printf("Fetching %d x %d tiles from (%d, %d) to (%d, %d) at level %x", xLen, yLen, xStart, yStart, xEnd, yEnd, level)
+	xStart, yStart, xEnd, yEnd := m.GetEnclosingTileIDs(a, b, level)
+	xLen := xEnd - xStart + 1
+	yLen := yEnd - yStart + 1
 
 	images := make([][]image.Image, yLen)
 	configs := make([][]image.Config, yLen)
 
-	log.Printf("Images: %+v", images)
-
-	count := 0
-	for y := int64(0); y < yLen; y += 1 {
+	for y := int64(0); y < yLen; y++ {
 		images[y] = make([]image.Image, xLen)
 		configs[y] = make([]image.Config, xLen)
 
-		for x := int64(0); x < xLen; x += 1 {
+		for x := int64(0); x < xLen; x++ {
 
 			xIndex := uint64(xStart + x)
 			yIndex := uint64(yStart + y)
 
-			log.Printf("Iteration %d Fetching tile (x: %d, y: %d, z: %d)", count, xIndex, yIndex, level)
+			xIndex, yIndex = m.WrapTileID(xIndex, yIndex, level)
 
 			img, cfg, err := m.GetTile(mapID, xIndex, yIndex, level, format, highDPI)
 			if err != nil {
@@ -176,31 +125,8 @@ func (m *Maps) GetEnclosingTiles(mapID MapID, a, b base.Location, level uint64, 
 
 			images[y][x] = img
 			configs[y][x] = *cfg
-
-			count++
 		}
 	}
 
 	return images, configs, nil
-}
-
-func (m *Maps) StitchTiles(images [][]image.Image, configs [][]image.Config) image.Image {
-
-	imgX := configs[0][0].Width
-	imgY := configs[0][0].Height
-
-	xSize := imgX * len(images[0])
-	ySize := imgY * len(images)
-
-	stitched := image.NewRGBA(image.Rect(0, 0, xSize, ySize))
-
-	for y, row := range images {
-		for x, img := range row {
-			sp := image.Point{x * imgX, y * imgY}
-			log.Printf("Stitching image (%d, %d) at position (%d, %d)", x, y, sp.X, sp.Y)
-			draw.Draw(stitched, img.Bounds(), img, sp, draw.Over)
-		}
-	}
-
-	return stitched
 }

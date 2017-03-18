@@ -9,12 +9,11 @@
 
 package base
 
-
 type Point []float64
 
 type Location struct {
-	Longitude float64 `json:"lng"`
 	Latitude  float64 `json:"lat"`
+	Longitude float64 `json:"lng"`
 }
 
 type BoundingBox []float64

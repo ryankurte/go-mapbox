@@ -10,14 +10,12 @@
 package maps
 
 import (
-	"bufio"
-	"image/jpeg"
-	"image/png"
 	"os"
 	"testing"
 )
 
 import (
+	"fmt"
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
@@ -43,20 +41,11 @@ func TestMaps(t *testing.T) {
 			t.FailNow()
 		}
 
-		f, err := os.Create("/tmp/go-mapbox-test.png")
+		err = maps.SaveImagePNG(img, "/tmp/go-mapbox-test.png")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
-
-		w := bufio.NewWriter(f)
-
-		err = png.Encode(w, img)
-		if err != nil {
-			t.Error(err)
-		}
-
-		f.Close()
 	})
 
 	t.Run("Can fetch map tiles as jpeg", func(t *testing.T) {
@@ -68,20 +57,11 @@ func TestMaps(t *testing.T) {
 			t.FailNow()
 		}
 
-		f, err := os.Create("/tmp/go-mapbox-test.jpg")
+		err = maps.SaveImageJPG(img, "/tmp/go-mapbox-test.jpg")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
-
-		w := bufio.NewWriter(f)
-
-		err = jpeg.Encode(w, img, nil)
-		if err != nil {
-			t.Error(err)
-		}
-
-		f.Close()
 	})
 
 	t.Run("Can fetch terrain RGB tiles", func(t *testing.T) {
@@ -92,50 +72,39 @@ func TestMaps(t *testing.T) {
 			t.FailNow()
 		}
 
-		f, err := os.Create("/tmp/go-mapbox-test-terrain.png")
+		err = maps.SaveImagePNG(img, "/tmp/go-mapbox-terrain.png")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
-
-		w := bufio.NewWriter(f)
-
-		err = jpeg.Encode(w, img, nil)
-		if err != nil {
-			t.Error(err)
-		}
-
-		f.Close()
 	})
 
 	t.Run("Can fetch map tiles by location", func(t *testing.T) {
 
-		locA := base.Location{-122.42, 20.78}
-		locB := base.Location{-77.03, 38.91}
+		locA := base.Location{-45.942805, 166.568500}
+		locB := base.Location{-34.2186101, 183.4015517}
 
-		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 4, MapFormatJpg90, true)
+		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
 
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
 
-		img := maps.StitchTiles(images, configs)
+		for y := range images {
+			for x := range images[y] {
+				maps.SaveImageJPG(images[y][x], fmt.Sprintf("/tmp/go-mapbox-stitch-%d-%d.jpg", x, y))
+			}
+		}
 
-		f, err := os.Create("/tmp/go-mapbox-stitch.jpg")
+		img := maps.StitchTiles(images, configs[0][0])
+
+		err = maps.SaveImageJPG(img, "/tmp/go-mapbox-stitch.jpg")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
 
-		w := bufio.NewWriter(f)
-
-		err = jpeg.Encode(w, img, nil)
-		if err != nil {
-			t.Error(err)
-		}
-
-		f.Close()
 	})
 
 }
