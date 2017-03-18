@@ -17,6 +17,7 @@ const (
 	MapIDPirates          MapID = "mapbox.pirates"
 	MapIDEmerald          MapID = "mapbox.emerald"
 	MapIDHighContrast     MapID = "mapbox.high-contrast"
+	MapIDTerrainRGB       MapID = "mapbox.terrain-rgb"
 )
 
 type MapFormat string
@@ -27,6 +28,7 @@ const (
 	MapFormatPng64  MapFormat = "png64"  // 64 color indexed PNG
 	MapFormatPng128 MapFormat = "png128" // 128 color indexed PNG
 	MapFormatPng256 MapFormat = "png256" // 256 color indexed PNG
+	MapFormatPngRaw MapFormat = "pngraw" // Raw PNG (only for MapIDTerrainRGB)
 	MapFormatJpg70  MapFormat = "jpg70"  // 70% quality JPG
 	MapFormatJpg80  MapFormat = "jpg80"  // 80% quality JPG
 	MapFormatJpg90  MapFormat = "jpg90"  // 90% quality JPG

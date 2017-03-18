@@ -1,1 +1,6 @@
 setenv.sh
+
+*.jpg
+*.png
+*.svg
+*.json
