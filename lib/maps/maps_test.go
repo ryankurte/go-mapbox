@@ -41,7 +41,7 @@ func TestMaps(t *testing.T) {
 			t.FailNow()
 		}
 
-		err = maps.SaveImagePNG(img, "/tmp/go-mapbox-test.png")
+		err = SaveImagePNG(img, "/tmp/go-mapbox-test.png")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
@@ -57,7 +57,7 @@ func TestMaps(t *testing.T) {
 			t.FailNow()
 		}
 
-		err = maps.SaveImageJPG(img, "/tmp/go-mapbox-test.jpg")
+		err = SaveImageJPG(img, "/tmp/go-mapbox-test.jpg")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
@@ -72,7 +72,7 @@ func TestMaps(t *testing.T) {
 			t.FailNow()
 		}
 
-		err = maps.SaveImagePNG(img, "/tmp/go-mapbox-terrain.png")
+		err = SaveImagePNG(img, "/tmp/go-mapbox-terrain.png")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
@@ -93,13 +93,41 @@ func TestMaps(t *testing.T) {
 
 		for y := range images {
 			for x := range images[y] {
-				maps.SaveImageJPG(images[y][x], fmt.Sprintf("/tmp/go-mapbox-stitch-%d-%d.jpg", x, y))
+				SaveImageJPG(images[y][x], fmt.Sprintf("/tmp/go-mapbox-stitch-%d-%d.jpg", x, y))
 			}
 		}
 
-		img := maps.StitchTiles(images, configs[0][0])
+		img := StitchTiles(images, configs[0][0])
 
-		err = maps.SaveImageJPG(img, "/tmp/go-mapbox-stitch.jpg")
+		err = SaveImageJPG(img, "/tmp/go-mapbox-stitch.jpg")
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
+	})
+
+	t.Run("Can fetch map tiles by location (with cache)", func(t *testing.T) {
+
+		locA := base.Location{-45.942805, 166.568500}
+		locB := base.Location{-34.2186101, 183.4015517}
+
+		cache, err := NewFileCache("/tmp/cache")
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+
+		maps.SetCache(cache)
+
+		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		img := StitchTiles(images, configs[0][0])
+
+		err = SaveImageJPG(img, "/tmp/go-mapbox-stitch2.jpg")
 		if err != nil {
 			t.Error(err)
 			t.FailNow()

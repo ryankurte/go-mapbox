@@ -15,36 +15,25 @@ import (
 	"image/draw"
 	"image/jpeg"
 	"image/png"
-	"log"
+	"io/ioutil"
 	"os"
 )
 
 import (
+	"bytes"
 	"github.com/paulmach/go.geo"
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
 // LocationToTileID converts a lat/lon location into a tile ID
-func (m *Maps) LocationToTileID(loc base.Location, level uint64) (int64, int64) {
-	if loc.Latitude > 180.0 {
-		loc.Latitude = 360.0 - loc.Latitude
-	}
-
-	// Calculate X and Y at a given level
+func LocationToTileID(loc base.Location, level uint64) (int64, int64) {
 	x, y := geo.ScalarMercator.Project(loc.Longitude, loc.Latitude, level)
-
-	log.Printf("Tile location (%d, %d)", x, y)
-
-	log.Printf("Corrected tile location (%d, %d) limit %d", x, y, (2 << (level - 1)))
-
 	return int64(x), int64(y)
 }
 
 // TileIDToLocation converts a tile ID to a lat/lon location
-func (m *Maps) TileIDToLocation(x, y, level uint64) base.Location {
-
+func TileIDToLocation(x, y, level uint64) base.Location {
 	lat, lng := geo.ScalarMercator.Inverse(x, y, level)
-
 	return base.Location{
 		Latitude:  lat,
 		Longitude: lng,
@@ -52,8 +41,8 @@ func (m *Maps) TileIDToLocation(x, y, level uint64) base.Location {
 }
 
 // WrapTileID wraps tile IDs by level for api requests
-// eg. Tile (X:16, Y:10, level:4 )will become (X:0, Y:10, level:4)
-func (m *Maps) WrapTileID(x, y, level uint64) (uint64, uint64) {
+// eg. Tile (X:16, Y:10, level:4 ) will become (X:0, Y:10, level:4)
+func WrapTileID(x, y, level uint64) (uint64, uint64) {
 	// Limit to 2^n tile range for a given level
 	x = x % (2 << (level - 1))
 	y = y % (2 << (level - 1))
@@ -62,11 +51,9 @@ func (m *Maps) WrapTileID(x, y, level uint64) (uint64, uint64) {
 }
 
 // GetEnclosingTileIDs fetches a pair of tile IDs enclosing the provided pair of points
-func (m *Maps) GetEnclosingTileIDs(a, b base.Location, level uint64) (int64, int64, int64, int64) {
-	aX, aY := m.LocationToTileID(a, level)
-	bX, bY := m.LocationToTileID(b, level)
-
-	log.Printf("aX: %d aY: %d bX: %d bY: %d", aX, aY, bX, bY)
+func GetEnclosingTileIDs(a, b base.Location, level uint64) (int64, int64, int64, int64) {
+	aX, aY := LocationToTileID(a, level)
+	bX, bY := LocationToTileID(b, level)
 
 	var xStart, xEnd, yStart, yEnd int64
 	if bX >= aX {
@@ -90,7 +77,7 @@ func (m *Maps) GetEnclosingTileIDs(a, b base.Location, level uint64) (int64, int
 
 // StitchTiles combines a 2d array of image tiles into a single larger image
 // Note that all images must have the same dimensions for this to work
-func (m *Maps) StitchTiles(images [][]image.Image, config image.Config) image.Image {
+func StitchTiles(images [][]image.Image, config image.Config) image.Image {
 
 	imgX := config.Width
 	imgY := config.Height
@@ -111,8 +98,34 @@ func (m *Maps) StitchTiles(images [][]image.Image, config image.Config) image.Im
 	return stitched
 }
 
+// LoadImage loads an image from a file
+func LoadImage(file string) (image.Image, *image.Config, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	r := bufio.NewReader(f)
+	data, err := ioutil.ReadAll(r)
+	f.Close()
+
+	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
+	if err != nil {
+		f.Close()
+		return nil, nil, err
+	}
+
+	img, _, err := image.Decode(bytes.NewReader(data))
+	if err != nil {
+		f.Close()
+		return nil, nil, err
+	}
+
+	return img, &cfg, nil
+}
+
 // SaveImageJPG writes an image instance to a jpg file
-func (m *Maps) SaveImageJPG(img image.Image, file string) error {
+func SaveImageJPG(img image.Image, file string) error {
 	f, err := os.Create(file)
 	if err != nil {
 		return err
@@ -131,7 +144,7 @@ func (m *Maps) SaveImageJPG(img image.Image, file string) error {
 }
 
 // SaveImagePNG writes an image instance to a png file
-func (m *Maps) SaveImagePNG(img image.Image, file string) error {
+func SaveImagePNG(img image.Image, file string) error {
 	f, err := os.Create(file)
 	if err != nil {
 		return err
