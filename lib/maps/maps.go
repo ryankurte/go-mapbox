@@ -162,3 +162,17 @@ func (m *Maps) GetEnclosingTiles(mapID MapID, a, b base.Location, level uint64, 
 
 	return images, configs, nil
 }
+
+type CompositeImage struct {
+	image.Image
+	tileBounds image.Rectangle
+}
+
+func NewCompositeImage(tileBounds image.Rectangle, img image.Image, level uint64) *CompositeImage {
+	c := CompositeImage{
+		Image:      img,
+		tileBounds: tileBounds,
+	}
+
+	return &c
+}

@@ -10,14 +10,24 @@
 package maps
 
 import (
+	"fmt"
+	"math"
 	"os"
 	"testing"
 )
 
 import (
-	"fmt"
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
+
+const allowedError = 0.001
+
+func CheckFloat(actual, expected float64) error {
+	if err := math.Abs(actual-expected) / math.Abs(actual); err > allowedError {
+		return fmt.Errorf("Actual: %f Expected: %f", actual, expected)
+	}
+	return nil
+}
 
 func TestMaps(t *testing.T) {
 
@@ -31,6 +41,25 @@ func TestMaps(t *testing.T) {
 	//b.SetDebug(true)
 
 	maps := NewMaps(b)
+
+	t.Run("Can convert between lat/lon and tile space", func(t *testing.T) {
+		lat := -45.942805
+		lon := 166.568500
+		zoom := uint64(10)
+
+		x, y := LatLonToTileXY(lat, lon, zoom)
+
+		reverseLat, reverseLon := TileXYToLatLon(x, y, zoom)
+
+		if err := CheckFloat(reverseLat, lat); err != nil {
+			t.Error(err)
+		}
+
+		if err := CheckFloat(reverseLon, lon); err != nil {
+			t.Error(err)
+		}
+
+	})
 
 	t.Run("Can fetch map tiles as png", func(t *testing.T) {
 
@@ -91,12 +120,6 @@ func TestMaps(t *testing.T) {
 			t.FailNow()
 		}
 
-		for y := range images {
-			for x := range images[y] {
-				SaveImageJPG(images[y][x], fmt.Sprintf("/tmp/go-mapbox-stitch-%d-%d.jpg", x, y))
-			}
-		}
-
 		img := StitchTiles(images, configs[0][0])
 
 		err = SaveImageJPG(img, "/tmp/go-mapbox-stitch.jpg")
@@ -109,8 +132,8 @@ func TestMaps(t *testing.T) {
 
 	t.Run("Can fetch map tiles by location (with cache)", func(t *testing.T) {
 
-		locA := base.Location{-45.942805, 166.568500}
-		locB := base.Location{-34.2186101, 183.4015517}
+		locA := base.Location{-47.50, 154.0}
+		locB := base.Location{-34.0, 182.0}
 
 		cache, err := NewFileCache("/tmp/go-mapbox-cache")
 		if err != nil {
@@ -120,7 +143,7 @@ func TestMaps(t *testing.T) {
 
 		maps.SetCache(cache)
 
-		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
+		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 8, MapFormatJpg90, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()

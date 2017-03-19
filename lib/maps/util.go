@@ -11,34 +11,19 @@ package maps
 
 import (
 	"bufio"
+	"bytes"
 	"image"
 	"image/draw"
 	"image/jpeg"
 	"image/png"
 	"io/ioutil"
+	"math"
 	"os"
 )
 
 import (
-	"bytes"
-	"github.com/paulmach/go.geo"
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
-
-// LocationToTileID converts a lat/lon location into a tile ID
-func LocationToTileID(loc base.Location, level uint64) (int64, int64) {
-	x, y := geo.ScalarMercator.Project(loc.Longitude, loc.Latitude, level)
-	return int64(x), int64(y)
-}
-
-// TileIDToLocation converts a tile ID to a lat/lon location
-func TileIDToLocation(x, y, level uint64) base.Location {
-	lat, lng := geo.ScalarMercator.Inverse(x, y, level)
-	return base.Location{
-		Latitude:  lat,
-		Longitude: lng,
-	}
-}
 
 // WrapTileID wraps tile IDs by level for api requests
 // eg. Tile (X:16, Y:10, level:4 ) will become (X:0, Y:10, level:4)
@@ -160,4 +145,36 @@ func SaveImagePNG(img image.Image, file string) error {
 	f.Close()
 
 	return nil
+}
+
+// Mercator transformations for calculating map positions
+// http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+
+// LatLonToTileXY converts a lat and lon (in degrees) at a given zoom level to tile coordinates
+func LatLonToTileXY(lat, lon float64, zoom uint64) (float64, float64) {
+	n := math.Pow(2, float64(zoom))
+
+	latRads := lat / 180.0 * math.Pi
+
+	x := n * ((lon + 180.0) / 360.0)
+	y := n * (1 - (math.Log(math.Tan(latRads)+1/math.Cos(latRads)) / math.Pi)) / 2
+
+	return x, y
+}
+
+// TileXYToLatLon converts a tile position (x, y) at a given zoom level to a lat and lon
+func TileXYToLatLon(x, y float64, zoom uint64) (float64, float64) {
+	n := math.Pow(2, float64(zoom))
+
+	lonDeg := (x / n * 360.0) - 180.0
+	latRad := math.Atan(math.Sinh(math.Pi * (1 - (2 * y / n))))
+	latDeg := latRad * 180.0 / math.Pi
+
+	return latDeg, lonDeg
+}
+
+// LocationToTileID converts a lat/lon location into a tile ID
+func LocationToTileID(loc base.Location, level uint64) (int64, int64) {
+	x, y := LatLonToTileXY(loc.Latitude, loc.Longitude, level)
+	return int64(math.Floor(x)), int64(math.Floor(y))
 }
