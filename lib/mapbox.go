@@ -12,6 +12,7 @@ package mapbox
 import (
 	"github.com/ryankurte/go-mapbox/lib/base"
 	"github.com/ryankurte/go-mapbox/lib/directions"
+	"github.com/ryankurte/go-mapbox/lib/directions_matrix"
 	"github.com/ryankurte/go-mapbox/lib/geocode"
 	"github.com/ryankurte/go-mapbox/lib/maps"
 )
@@ -25,6 +26,8 @@ type Mapbox struct {
 	Geocode *geocode.Geocode
 	// Directions generates directions between arbitrary points
 	Directions *directions.Directions
+	// Direction Matrix returns all travel times and ways points between multiple points
+	DirectionsMatrix *directionsmatrix.DirectionsMatrix
 }
 
 // NewMapbox Create a new mapbox API instance
@@ -38,6 +41,7 @@ func NewMapbox(token string) *Mapbox {
 	m.Maps = maps.NewMaps(m.base)
 	m.Geocode = geocode.NewGeocode(m.base)
 	m.Directions = directions.NewDirections(m.base)
+	m.DirectionsMatrix = directionsmatrix.NewDirectionsMatrix(m.base)
 
 	return m
 }

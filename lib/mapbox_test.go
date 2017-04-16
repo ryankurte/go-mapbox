@@ -9,6 +9,7 @@ import (
 import (
 	"github.com/ryankurte/go-mapbox/lib/base"
 	"github.com/ryankurte/go-mapbox/lib/directions"
+	"github.com/ryankurte/go-mapbox/lib/directions_matrix"
 	"github.com/ryankurte/go-mapbox/lib/geocode"
 	"github.com/ryankurte/go-mapbox/lib/maps"
 )
@@ -65,4 +66,18 @@ func TestMaps(t *testing.T) {
 		t.Error(err)
 	}
 
+	// Directions Matrix API
+	var directionMatrixOpts directionsmatrix.RequestOpts
+	// Only 1st and second points will act as a source the response will be a 2x3 matrix
+	source := []string{"0", "1"}
+	dest := []string{"all"}
+	directionMatrixOpts.SetSources(source)
+	directionMatrixOpts.SetDestinations(dest)
+
+	points := []base.Location{{37.752759, -122.467600}, {37.762819, -122.460304}, {37.758095, -122.442253}}
+
+	_, err = mapBox.DirectionsMatrix.GetDirectionsMatrix(points, directionsmatrix.RoutingCycling, &directionMatrixOpts)
+	if err != nil {
+		t.Error(err)
+	}
 }
