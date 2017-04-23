@@ -16,6 +16,8 @@ Very early WIP, pull requests and issues are most welcome. See [lib/geocode/](li
 
 - [X] Geocoding
 - [X] Directions
+- [X] Directions Matrix
+- [X] Map Matching
 - [ ] Styles
 - [X] Maps
 - [ ] Static
