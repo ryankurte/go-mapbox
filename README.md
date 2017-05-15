@@ -12,6 +12,8 @@ See [here](https://golanglibs.com/top?q=mapbox) for other golang/mapbox projects
 
 Very early WIP, pull requests and issues are most welcome. See [lib/geocode/](lib/geocode) or [lib/directions/](lib/directions) for an example module to mimic.
 
+Because Travis-CI does not expose the build environment to untrusted branches (ie. Pull Requests) tests have to be manually prompted by a repository admin then force merged. Don't panic when your local tests pass but travis fails with "Mapbox API token not found", we will manually run them as soon as possible. See issue [#10](https://github.com/ryankurte/go-mapbox/issues/10) for more information.
+
 ### Modules
 
 - [X] Geocoding
