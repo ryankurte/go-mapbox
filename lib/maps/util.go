@@ -11,29 +11,25 @@ package maps
 
 import (
 	"bufio"
+	"bytes"
 	"image"
 	"image/draw"
 	"image/jpeg"
 	"image/png"
 	"io/ioutil"
 	"os"
-)
 
-import (
-	"bytes"
-	"github.com/paulmach/go.geo"
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
 // LocationToTileID converts a lat/lon location into a tile ID
-func LocationToTileID(loc base.Location, level uint64) (int64, int64) {
-	x, y := geo.ScalarMercator.Project(loc.Longitude, loc.Latitude, level)
-	return int64(x), int64(y)
+func LocationToTileID(loc base.Location, level uint64) (uint64, uint64) {
+	return MercatorLocationToTileID(loc.Latitude, loc.Longitude, level, 256)
 }
 
 // TileIDToLocation converts a tile ID to a lat/lon location
-func TileIDToLocation(x, y, level uint64) base.Location {
-	lat, lng := geo.ScalarMercator.Inverse(x, y, level)
+func TileIDToLocation(x, y float64, level uint64) base.Location {
+	lat, lng := MercatorPixelToLocation(x, y, level, 256)
 	return base.Location{
 		Latitude:  lat,
 		Longitude: lng,
@@ -51,11 +47,11 @@ func WrapTileID(x, y, level uint64) (uint64, uint64) {
 }
 
 // GetEnclosingTileIDs fetches a pair of tile IDs enclosing the provided pair of points
-func GetEnclosingTileIDs(a, b base.Location, level uint64) (int64, int64, int64, int64) {
+func GetEnclosingTileIDs(a, b base.Location, level uint64) (uint64, uint64, uint64, uint64) {
 	aX, aY := LocationToTileID(a, level)
 	bX, bY := LocationToTileID(b, level)
 
-	var xStart, xEnd, yStart, yEnd int64
+	var xStart, xEnd, yStart, yEnd uint64
 	if bX >= aX {
 		xStart = aX
 		xEnd = bX

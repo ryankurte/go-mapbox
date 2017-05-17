@@ -137,11 +137,11 @@ func (m *Maps) GetEnclosingTiles(mapID MapID, a, b base.Location, level uint64, 
 	images := make([][]image.Image, yLen)
 	configs := make([][]image.Config, yLen)
 
-	for y := int64(0); y < yLen; y++ {
+	for y := uint64(0); y < yLen; y++ {
 		images[y] = make([]image.Image, xLen)
 		configs[y] = make([]image.Config, xLen)
 
-		for x := int64(0); x < xLen; x++ {
+		for x := uint64(0); x < xLen; x++ {
 
 			xIndex := uint64(xStart + x)
 			yIndex := uint64(yStart + y)

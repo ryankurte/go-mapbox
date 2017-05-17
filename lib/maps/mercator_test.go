@@ -20,75 +20,70 @@ import (
 
 const delta = 1e-6
 
-func TestScalarMercator(t *testing.T) {
+func TestMercator(t *testing.T) {
+	zoom := uint64(4)
+	size := uint64(256)
+	fsize := float64(size)
 
-	t.Run("Performs naive web mercator projections", func(t *testing.T) {
-		zoom := uint64(4)
-		size := uint64(256)
-		fsize := float64(size)
+	loc := base.Location{-45.942805, 166.568500}
 
-		loc := base.Location{-45.942805, 166.568500}
+	t.Run("Performs mercator projections to global pixels", func(t *testing.T) {
+		x, y := MercatorLocationToPixel(loc.Latitude, loc.Longitude, zoom, size)
+		assert.EqualValues(t, 15.0, math.Floor(x/fsize))
+		assert.EqualValues(t, 10.0, math.Floor(y/fsize))
 
-		xExpected, yExpected := LocationToTileID(loc, zoom)
+		// Increase zoom scale x2 multiplies location by 4
+		x, y = MercatorLocationToPixel(loc.Latitude, loc.Longitude, zoom+2, size)
+		assert.EqualValues(t, 15.0*4+1, math.Floor(x/fsize))
+		assert.EqualValues(t, 10.0*4+1, math.Floor(y/fsize))
 
-		x, y := NaiveLocationToPixel(loc.Latitude, loc.Longitude, zoom, size)
-		assert.EqualValues(t, xExpected, math.Floor(x/fsize))
-		assert.EqualValues(t, yExpected, math.Floor(y/fsize))
+		// Doubling tile size doubles pixel location
+		x, y = MercatorLocationToPixel(loc.Latitude, loc.Longitude, zoom, size*2)
+		assert.EqualValues(t, 15.0*2, math.Floor(x/fsize))
+		assert.EqualValues(t, 10.0*2, math.Floor(y/fsize))
+	})
 
-		lat2, lng2 := NaivePixelToLocation(x, y, zoom, size)
+	t.Run("Performs mercator projections to tile IDs", func(t *testing.T) {
+		x, y := MercatorLocationToTileID(loc.Latitude, loc.Longitude, zoom, size)
+		assert.EqualValues(t, 15, x)
+		assert.EqualValues(t, 10, y)
+
+		// Increasing zoom level by 2 multiplies tile IDs by 4
+		x, y = MercatorLocationToTileID(loc.Latitude, loc.Longitude, zoom+2, size)
+		assert.EqualValues(t, 15*4+1, x)
+		assert.EqualValues(t, 10*4+1, y)
+
+		// Doubling tile size does not change tile ID
+		x, y = MercatorLocationToTileID(loc.Latitude, loc.Longitude, zoom, size*2)
+		assert.EqualValues(t, 15, x)
+		assert.EqualValues(t, 10, y)
+	})
+
+	t.Run("Reverses mercator projections", func(t *testing.T) {
+		x, y := MercatorLocationToPixel(loc.Latitude, loc.Longitude, zoom, size)
+
+		lat2, lng2 := MercatorPixelToLocation(x, y, zoom, size)
 		assert.InDelta(t, loc.Latitude, lat2, delta)
 		assert.InDelta(t, loc.Longitude, lng2, delta)
 	})
-
-	t.Run("Performs cached scalar mercator projections", func(t *testing.T) {
-
-		zoom := uint64(4)
-		loc := base.Location{-45.942805, 166.568500}
-
-		sm := NewSphericalMercator(256)
-
-		xExpected, yExpected := LocationToTileID(loc, zoom)
-
-		x, y := sm.LocationToPixel(loc.Latitude, loc.Longitude, zoom)
-		assert.EqualValues(t, xExpected, math.Floor(x/256))
-		assert.EqualValues(t, yExpected, math.Floor(y/256))
-
-		lat2, lng2 := sm.PixelToLocation(x, y, zoom)
-		assert.InDelta(t, loc.Latitude, lat2, delta)
-		assert.InDelta(t, loc.Longitude, lng2, delta)
-	})
-
 }
 
-func BenchmarkScalarMercator(b *testing.B) {
+func BenchmarkMercator(b *testing.B) {
 	zoom := uint64(4)
 	loc := base.Location{Latitude: -45.942805, Longitude: 166.568500}
 	size := uint64(256)
 
-	sm := NewSphericalMercator(256)
-	x, y := NaiveLocationToPixel(loc.Latitude, loc.Longitude, zoom, size)
+	x, y := MercatorLocationToPixel(loc.Latitude, loc.Longitude, zoom, size)
 
-	b.Run("Forward naive projection", func(b *testing.B) {
+	b.Run("Forward projection", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			NaiveLocationToPixel(loc.Latitude, loc.Longitude, zoom, size)
+			MercatorLocationToPixel(loc.Latitude, loc.Longitude, zoom, size)
 		}
 	})
 
-	b.Run("Reverse naive projection", func(b *testing.B) {
+	b.Run("Reverse projection", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			NaiveLocationToPixel(x, y, zoom, size)
-		}
-	})
-
-	b.Run("Forward optimised projection", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			sm.LocationToPixel(loc.Latitude, loc.Longitude, zoom)
-		}
-	})
-
-	b.Run("Reverse optimised projection", func(b *testing.B) {
-		for i := 0; i < b.N; i++ {
-			sm.LocationToPixel(x, y, zoom)
+			MercatorPixelToLocation(x, y, zoom, size)
 		}
 	})
 
