@@ -10,12 +10,12 @@
 package maps
 
 import (
+	"fmt"
 	"os"
 	"testing"
-)
 
-import (
-	"fmt"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
@@ -35,33 +35,19 @@ func TestMaps(t *testing.T) {
 	t.Run("Can fetch map tiles as png", func(t *testing.T) {
 
 		img, _, err := maps.GetTile(MapIDStreets, 1, 0, 1, MapFormatPng, true)
-
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		assert.Nil(t, err)
 
 		err = SaveImagePNG(img, "/tmp/go-mapbox-test.png")
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		assert.Nil(t, err)
 	})
 
 	t.Run("Can fetch map tiles as jpeg", func(t *testing.T) {
 
 		img, _, err := maps.GetTile(MapIDSatellite, 1, 0, 1, MapFormatJpg90, true)
-
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		assert.Nil(t, err)
 
 		err = SaveImageJPG(img, "/tmp/go-mapbox-test.jpg")
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		assert.Nil(t, err)
 	})
 
 	t.Run("Can fetch terrain RGB tiles", func(t *testing.T) {

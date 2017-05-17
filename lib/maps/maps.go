@@ -16,13 +16,11 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"io/ioutil"
+	"log"
 	"net/url"
 	"strings"
-)
 
-import (
 	"github.com/ryankurte/go-mapbox/lib/base"
-	"log"
 )
 
 const (
