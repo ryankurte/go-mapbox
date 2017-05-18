@@ -164,3 +164,11 @@ func PixelToHeight(r, g, b uint8) float64 {
 	R, G, B := float64(r), float64(g), float64(b)
 	return -10000 + ((R*256*256 + G*256 + B) * 0.1)
 }
+
+func HeightToPixel(alt float64) (uint8, uint8, uint8) {
+	increments := int((alt + 10000) / 0.1)
+	b := uint8((increments >> 0) % 0xFF)
+	g := uint8((increments >> 8) % 0xFF)
+	r := uint8((increments >> 16) % 0xFF)
+	return r, g, b
+}

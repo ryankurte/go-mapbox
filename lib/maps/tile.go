@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/draw"
-	"log"
 	"math"
 
 	"github.com/ryankurte/go-mapbox/lib/base"
@@ -177,7 +176,6 @@ func (t *Tile) GetAltitude(loc base.Location) (float64, error) {
 		return 0.0, err
 	}
 	p := t.Image.At(offsetX, offsetY).(color.RGBA)
-	log.Printf("Pixel: %+v", p)
 	return PixelToHeight(p.R, p.G, p.B), nil
 }
 
@@ -192,113 +190,15 @@ func (t *Tile) InterpolateAltitudes(loc1, loc2 base.Location) []float64 {
 	return altitudes
 }
 
-func GradientInterpolate2D(m [][]float64, ignore float64) [][]float64 {
-	lenY := len(m)
-	lenX := len(m[0])
+func (t *Tile) FlattenAltitudes(maxHeight float64) image.Image {
+	img := image.NewRGBA(t.Image.Bounds())
 
-	log.Printf("Original:      %+v", m)
-
-	interpolatedX := make([][]float64, lenY)
-	for i := range m {
-		interpolatedX[i] = make([]float64, lenX)
-	}
-
-	for y := 0; y < lenY; y++ {
-		interpolateCount := 0
-		lastX := 0
-
-		for x := 0; x < lenX; x++ {
-			p := m[y][x]
-			log.Printf("X: %d, y: %d, p: %.2f ic: %d", x, y, p, interpolateCount)
-			if p != ignore {
-				interpolatedX[y][x] = p
-
-				if interpolateCount > 0 && !(lastX == 0 && m[y][0] == ignore) {
-					last, next := m[y][lastX], p
-					delta := (next - last) / float64(interpolateCount+1)
-					log.Printf("Interpolate H last X: %d (%.2f) next X: %d (%.2f) count: %d delta: %.2f",
-						lastX, last, x, next, interpolateCount, delta)
-
-					for j := 1; j < interpolateCount+1; j++ {
-						val := last + float64(j)*delta
-						log.Printf("Filling x: %d value: %.2f", lastX+j, val)
-						interpolatedX[y][lastX+j] = val
-					}
-
-					interpolateCount = 0
-				}
-				lastX = x
-
-			} else {
-				if !(lastX == 0 && m[y][0] == ignore) {
-					interpolateCount++
-				}
-
-			}
+	for y := 0; y < t.Image.Bounds().Dy(); y++ {
+		for x := 0; x < t.Image.Bounds().Dx(); x++ {
+			p := t.Image.At(x, y).(color.RGBA)
+			alt := uint8(PixelToHeight(p.R, p.G, p.B) / maxHeight * 255)
+			img.Set(x, y, color.RGBA{R: alt, G: alt, B: alt, A: 255})
 		}
 	}
-
-	log.Printf("Interpolated X:  %+v", interpolatedX)
-
-	interpolatedY := make([][]float64, lenY)
-	for i := range m {
-		interpolatedY[i] = make([]float64, lenX)
-	}
-
-	for x := 0; x < lenX; x++ {
-		interpolateCount := 0
-		lastY := 0
-
-		for y := 0; y < lenY; y++ {
-			p := m[y][x]
-			log.Printf("Vertical iterator X: %d, y: %d, p: %.2f ic: %d", x, y, p, interpolateCount)
-			if p != ignore {
-				interpolatedY[y][x] = p
-
-				if interpolateCount > 0 && !(lastY == 0 && m[0][x] == ignore) {
-					last, next := m[lastY][x], p
-					delta := (next - last) / float64(interpolateCount+1)
-					log.Printf("Interpolate V last Y: %d (%.2f) next Y: %d (%.2f) count: %d delta: %.2f",
-						lastY, last, y, next, interpolateCount, delta)
-
-					for j := 1; j < interpolateCount+1; j++ {
-						val := last + float64(j)*delta
-						log.Printf("Filling y: %d value: %.2f", lastY+j, val)
-						interpolatedY[lastY+j][x] = val
-					}
-
-					interpolateCount = 0
-				}
-				lastY = y
-
-			} else {
-				if !(lastY == 0 && m[0][x] == ignore) {
-					interpolateCount++
-				}
-
-			}
-		}
-	}
-
-	log.Printf("Interpolated Y:  %+v", interpolatedY)
-
-	interpolated := make([][]float64, lenY)
-	for y := 0; y < lenY; y++ {
-		interpolated[y] = make([]float64, lenX)
-		for x := 0; x < lenX; x++ {
-			intX := interpolatedX[y][x]
-			intY := interpolatedY[y][x]
-			if intX == ignore {
-				interpolated[y][x] = intY
-			} else if intY == ignore {
-				interpolated[y][x] = intX
-			} else {
-				interpolated[y][x] = (interpolatedX[y][x] + interpolatedY[y][x]) / 2
-			}
-		}
-	}
-
-	log.Printf("Interpolated 2D: %+v", interpolated)
-
-	return interpolated
+	return img
 }

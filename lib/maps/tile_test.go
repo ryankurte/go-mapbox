@@ -127,13 +127,13 @@ func TestTiles(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
-	t.Run("Can fetch altitudes from terrain data", func(t *testing.T) {
+	t.Run("Can fetch terrain data points", func(t *testing.T) {
 		locA := base.Location{-39.5, 173.5}
 		locB := base.Location{-39.0, 174.5}
-		taranaki := base.Location{-39.2968, 174.0634}
+		taranaki := base.Location{-39.295182, 174.063668}
 		level := uint64(11)
 
-		images, configs, err := maps.GetEnclosingTiles(MapIDTerrainRGB, locA, locB, level, MapFormatPngRaw, false)
+		images, configs, err := maps.GetEnclosingTiles(MapIDTerrainRGB, locA, locB, level, MapFormatPngRaw, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
@@ -141,26 +141,18 @@ func TestTiles(t *testing.T) {
 		img := StitchTiles(images, configs[0][0])
 
 		x1, y1, _, _ := GetEnclosingTileIDs(locA, locB, level)
-		tile := NewTile(x1, y1, level, 128, img)
+		tile := NewTile(x1, y1, level, size, img)
 
 		err = SaveImageJPG(tile, "/tmp/mapbox-tile-test-7.png")
 		assert.Nil(t, err)
 
 		alt, err := tile.GetAltitude(taranaki)
 		assert.Nil(t, err)
-		assert.InDelta(t, 2308, alt, 10)
+		assert.InDelta(t, 2400, alt, 100)
 
-	})
-
-	t.Run("Can interpolate terrain data", func(t *testing.T) {
-		terrain := [][]float64{
-			{1.0, 2.0, 0.0, 4.0},
-			{1.0, 0.0, 0.0, 1.0},
-			{0.0, 2.0, 3.0, 0.0},
-			{2.0, 3.0, 4.0, 5.0},
-		}
-
-		GradientInterpolate2D(terrain, 0.0)
+		flattened := tile.FlattenAltitudes(3000)
+		err = SaveImageJPG(flattened, "/tmp/mapbox-tile-test-8.png")
+		assert.Nil(t, err)
 
 	})
 
