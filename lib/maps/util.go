@@ -160,9 +160,7 @@ func SaveImagePNG(img image.Image, file string) error {
 
 // PixelToHeight Converts a pixel to a height value for mapbox terrain tiles
 // Equation from https://www.mapbox.com/blog/terrain-rgb/
-func PixelToHeight(pixel image.RGBA) float64 {
-	R := float64(pixel.Pix[0])
-	G := float64(pixel.Pix[1])
-	B := float64(pixel.Pix[2])
+func PixelToHeight(r, g, b uint8) float64 {
+	R, G, B := float64(r), float64(g), float64(b)
 	return -10000 + ((R*256*256 + G*256 + B) * 0.1)
 }

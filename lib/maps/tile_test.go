@@ -10,6 +10,7 @@
 package maps
 
 import (
+	"image/color"
 	"os"
 	"testing"
 
@@ -29,6 +30,15 @@ func TestTiles(t *testing.T) {
 	b := base.NewBase(token)
 
 	maps := NewMaps(b)
+
+	cache, err := NewFileCache("/tmp/go-mapbox-cache")
+	if err != nil {
+		t.Error(err)
+		t.FailNow()
+	}
+
+	maps.SetCache(cache)
+
 	size := uint64(512)
 	x, y, z := uint64(15), uint64(9), uint64(4)
 
@@ -77,14 +87,6 @@ func TestTiles(t *testing.T) {
 		locA := base.Location{-45.942805, 166.568500}
 		locB := base.Location{-34.2186101, 183.4015517}
 
-		cache, err := NewFileCache("/tmp/go-mapbox-cache")
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
-
-		maps.SetCache(cache)
-
 		x1, y1, _, _ := GetEnclosingTileIDs(locA, locB, 6)
 		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
 		if err != nil {
@@ -101,6 +103,65 @@ func TestTiles(t *testing.T) {
 
 		err = SaveImageJPG(tile, "/tmp/mapbox-tile-test-5.jpg")
 		assert.Nil(t, err)
+	})
+
+	t.Run("Can interpolate lines over complex tiles", func(t *testing.T) {
+		locA := base.Location{-45.942805, 166.568500}
+		locB := base.Location{-34.2186101, 183.4015517}
+
+		x1, y1, _, _ := GetEnclosingTileIDs(locA, locB, 6)
+		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		img := StitchTiles(images, configs[0][0])
+
+		tile := NewTile(x1, y1, 6, size, img)
+		a, b, c := base.Location{-36.8485, 174.7633}, base.Location{-41.2865, 174.7762}, base.Location{-43.5321, 172.6362}
+		tile.DrawLine(a, b, color.RGBA{R: 255, G: 0, B: 0, A: 255})
+		tile.DrawLine(b, c, color.RGBA{R: 255, G: 0, B: 0, A: 255})
+		tile.DrawLine(c, a, color.RGBA{R: 255, G: 0, B: 0, A: 255})
+
+		err = SaveImageJPG(tile, "/tmp/mapbox-tile-test-6.jpg")
+		assert.Nil(t, err)
+	})
+
+	t.Run("Can fetch altitudes from terrain data", func(t *testing.T) {
+		locA := base.Location{-39.5, 173.5}
+		locB := base.Location{-39.0, 174.5}
+		taranaki := base.Location{-39.2968, 174.0634}
+		level := uint64(11)
+
+		images, configs, err := maps.GetEnclosingTiles(MapIDTerrainRGB, locA, locB, level, MapFormatPngRaw, false)
+		if err != nil {
+			t.Error(err)
+			t.FailNow()
+		}
+		img := StitchTiles(images, configs[0][0])
+
+		x1, y1, _, _ := GetEnclosingTileIDs(locA, locB, level)
+		tile := NewTile(x1, y1, level, 128, img)
+
+		err = SaveImageJPG(tile, "/tmp/mapbox-tile-test-7.png")
+		assert.Nil(t, err)
+
+		alt, err := tile.GetAltitude(taranaki)
+		assert.Nil(t, err)
+		assert.InDelta(t, 2308, alt, 10)
+
+	})
+
+	t.Run("Can interpolate terrain data", func(t *testing.T) {
+		terrain := [][]float64{
+			{1.0, 2.0, 0.0, 4.0},
+			{1.0, 0.0, 0.0, 1.0},
+			{0.0, 2.0, 3.0, 0.0},
+			{2.0, 3.0, 4.0, 5.0},
+		}
+
+		GradientInterpolate2D(terrain, 0.0)
+
 	})
 
 }

@@ -63,6 +63,9 @@ func (m *Maps) GetTile(mapID MapID, x, y, z uint64, format MapFormat, highDPI bo
 	if format == MapFormatPngRaw && mapID != MapIDTerrainRGB {
 		return nil, nil, fmt.Errorf("MapFormatPngRaw only supported for MapIDTerrainRGB")
 	}
+	if mapID == MapIDTerrainRGB && format != MapFormatPngRaw {
+		return nil, nil, fmt.Errorf("MapIDTerrainRGB only supports format MapFormatPngRaw")
+	}
 
 	// Attempt cache lookup if available
 	if m.cache != nil {
