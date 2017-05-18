@@ -73,10 +73,10 @@ func GetEnclosingTileIDs(a, b base.Location, level uint64) (uint64, uint64, uint
 
 // StitchTiles combines a 2d array of image tiles into a single larger image
 // Note that all images must have the same dimensions for this to work
-func StitchTiles(images [][]image.Image, config image.Config) image.Image {
+func StitchTiles(images [][]Tile) image.Image {
 
-	imgX := config.Width
-	imgY := config.Height
+	imgX := images[0][0].Image.Bounds().Dx()
+	imgY := images[0][0].Image.Bounds().Dy()
 
 	xSize := imgX * len(images[0])
 	ySize := imgY * len(images)

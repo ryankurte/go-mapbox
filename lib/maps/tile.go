@@ -18,6 +18,11 @@ type Tile struct {
 	X, Y  uint64 // Tile X and Y postions (Web Mercurator projection)
 }
 
+const (
+	SizeStandard uint64 = 256
+	SizeHighDPI  uint64 = 512
+)
+
 // NewTile creates a tile with a base RGBA object
 func NewTile(x, y, level, size uint64, src image.Image) Tile {
 	// Convert image to RGBA
