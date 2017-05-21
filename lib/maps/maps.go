@@ -111,6 +111,12 @@ func (m *Maps) GetTile(mapID MapID, x, y, z uint64, format MapFormat, highDPI bo
 		return nil, fmt.Errorf("Invalid API call: %s message: %s", resp.Request.URL, string(data))
 	}
 
+	// Decode config
+	_, _, err = image.DecodeConfig(bytes.NewReader(data))
+	if err != nil {
+		return nil, err
+	}
+
 	// Convert to image
 	img, _, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
@@ -123,7 +129,7 @@ func (m *Maps) GetTile(mapID MapID, x, y, z uint64, format MapFormat, highDPI bo
 	// Save to cache if available
 	// Tile is post RGB conversion (should avoid pngraw issues)
 	if m.cache != nil {
-		err = m.cache.Save(mapID, x, y, z, format, highDPI, tile)
+		err = m.cache.Save(mapID, x, y, z, format, highDPI, img)
 		if err != nil {
 			log.Printf("Cache save error (%s)", err)
 		}

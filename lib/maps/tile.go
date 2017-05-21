@@ -39,6 +39,36 @@ func NewTile(x, y, level, size uint64, src image.Image) Tile {
 	}
 }
 
+// LocationToPixel translates a global location to a pixel on the tile
+func (t *Tile) LocationToPixel(loc base.Location) (float64, float64, error) {
+	x, y := MercatorLocationToPixel(loc.Latitude, loc.Longitude, t.Level, t.Size)
+	offsetX, offsetY := x-float64(t.X*t.Size), y-float64(t.Y*t.Size)
+
+	if xMax := float64(t.Image.Bounds().Max.X); (offsetX < 0) || (offsetX > xMax) {
+		return 0, 0, fmt.Errorf("Tile LocationToPixel error: global X offset not within tile space (x: %d max: %d)", offsetX, int(xMax))
+	}
+	if yMax := float64(t.Image.Bounds().Max.Y); (offsetY < 0) || (offsetY > yMax) {
+		return 0, 0, fmt.Errorf("Tile LocationToPixel error: global Y offset not within tile space (y: %d max: %d)", offsetY, int(yMax))
+	}
+
+	return offsetX, offsetY, nil
+}
+
+// PixelToLocation translates a pixel location in the tile into a global location
+func (t *Tile) PixelToLocation(x, y float64) (*base.Location, error) {
+	if xMax := float64(t.Image.Bounds().Max.X); (x < 0) || (x > xMax) {
+		return nil, fmt.Errorf("Tile LocationToPixel error: global X offset not within tile space (x: %.2f max: %d)", x, int(xMax))
+	}
+	if yMax := float64(t.Image.Bounds().Max.Y); (y < 0) || (y > yMax) {
+		return nil, fmt.Errorf("Tile LocationToPixel error: global Y offset not within tile space (y: %.2f max: %d)", y, int(yMax))
+	}
+
+	offsetX, offsetY := x+float64(t.X*t.Size), y+float64(t.Y*t.Size)
+	lat, lng := MercatorPixelToLocation(offsetX, offsetY, t.Level, t.Size)
+
+	return &base.Location{Latitude: lat, Longitude: lng}, nil
+}
+
 // Justify sets image offsets for drawing
 type Justify string
 

@@ -105,7 +105,8 @@ func LoadImage(file string) (image.Image, *image.Config, error) {
 	data, err := ioutil.ReadAll(r)
 	f.Close()
 
-	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
+	cfg := image.Config{}
+	cfg, _, err = image.DecodeConfig(bytes.NewReader(data))
 	if err != nil {
 		f.Close()
 		return nil, nil, err

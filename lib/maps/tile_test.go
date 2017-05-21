@@ -44,7 +44,7 @@ func TestTiles(t *testing.T) {
 
 	loc := base.Location{-36.8485, 174.7633}
 
-	img, _, err := maps.GetTile(MapIDSatellite, x, y, z, MapFormatJpg90, true)
+	img, err := maps.GetTile(MapIDSatellite, x, y, z, MapFormatJpg90, true)
 	assert.Nil(t, err)
 
 	err = SaveImageJPG(img, "/tmp/mapbox-tile-test-1.jpg")
@@ -88,12 +88,12 @@ func TestTiles(t *testing.T) {
 		locB := base.Location{-34.2186101, 183.4015517}
 
 		x1, y1, _, _ := GetEnclosingTileIDs(locA, locB, 6)
-		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
+		images, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
-		img := StitchTiles(images, configs[0][0])
+		img := StitchTiles(images)
 
 		tile := NewTile(x1, y1, 6, size, img)
 
@@ -110,12 +110,12 @@ func TestTiles(t *testing.T) {
 		locB := base.Location{-34.2186101, 183.4015517}
 
 		x1, y1, _, _ := GetEnclosingTileIDs(locA, locB, 6)
-		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
+		images, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
-		img := StitchTiles(images, configs[0][0])
+		img := StitchTiles(images)
 
 		tile := NewTile(x1, y1, 6, size, img)
 		a, b, c := base.Location{-36.8485, 174.7633}, base.Location{-41.2865, 174.7762}, base.Location{-43.5321, 172.6362}
@@ -131,14 +131,14 @@ func TestTiles(t *testing.T) {
 		locA := base.Location{-39.5, 173.5}
 		locB := base.Location{-39.0, 174.5}
 		taranaki := base.Location{-39.295182, 174.063668}
-		level := uint64(11)
+		level := uint64(6)
 
-		images, configs, err := maps.GetEnclosingTiles(MapIDTerrainRGB, locA, locB, level, MapFormatPngRaw, true)
+		images, err := maps.GetEnclosingTiles(MapIDTerrainRGB, locA, locB, level, MapFormatPngRaw, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
-		img := StitchTiles(images, configs[0][0])
+		img := StitchTiles(images)
 
 		x1, y1, _, _ := GetEnclosingTileIDs(locA, locB, level)
 		tile := NewTile(x1, y1, level, size, img)
