@@ -213,6 +213,9 @@ stitch:
 			if !ok {
 				break stitch
 			}
+			if t == nil {
+				return nil, fmt.Errorf("api error")
+			}
 			tiles[t.Y-yStart][t.X-xStart] = *t
 		}
 	}
