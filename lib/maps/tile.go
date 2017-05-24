@@ -225,6 +225,21 @@ func (t *Tile) InterpolateAltitudes(loc1, loc2 base.Location) []float64 {
 	return altitudes
 }
 
+func (t *Tile) GetHighestAltitude() float64 {
+	p := t.Image.At(0, 0).(color.RGBA)
+	max := PixelToHeight(p.R, p.G, p.B)
+	for y := 0; y < t.Image.Bounds().Dy(); y++ {
+		for x := 0; x < t.Image.Bounds().Dx(); x++ {
+			p := t.Image.At(x, y).(color.RGBA)
+			alt := PixelToHeight(p.R, p.G, p.B)
+			if alt > max {
+				max = alt
+			}
+		}
+	}
+	return max
+}
+
 func (t *Tile) FlattenAltitudes(maxHeight float64) Tile {
 	img := image.NewRGBA(t.Image.Bounds())
 
