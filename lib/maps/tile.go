@@ -225,7 +225,7 @@ func (t *Tile) InterpolateAltitudes(loc1, loc2 base.Location) []float64 {
 	return altitudes
 }
 
-func (t *Tile) FlattenAltitudes(maxHeight float64) image.Image {
+func (t *Tile) FlattenAltitudes(maxHeight float64) Tile {
 	img := image.NewRGBA(t.Image.Bounds())
 
 	for y := 0; y < t.Image.Bounds().Dy(); y++ {
@@ -235,5 +235,6 @@ func (t *Tile) FlattenAltitudes(maxHeight float64) image.Image {
 			img.Set(x, y, color.RGBA{R: alt, G: alt, B: alt, A: 255})
 		}
 	}
-	return img
+
+	return NewTile(t.X, t.Y, t.Level, t.Size, img)
 }

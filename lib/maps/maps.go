@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/ryankurte/go-mapbox/lib/base"
+	"sync"
 )
 
 const (
@@ -163,6 +164,56 @@ func (m *Maps) GetEnclosingTiles(mapID MapID, a, b base.Location, level uint64, 
 			}
 
 			tiles[y][x] = *tile
+		}
+	}
+
+	return tiles, nil
+}
+
+func (m *Maps) FastGetEnclosingTiles(mapID MapID, a, b base.Location, level uint64, format MapFormat, highDPI bool) ([][]Tile, error) {
+	// Convert to tile locations
+	xStart, yStart, xEnd, yEnd := GetEnclosingTileIDs(a, b, level)
+	xLen := xEnd - xStart + 1
+	yLen := yEnd - yStart + 1
+
+	in := make(chan *Tile, 1)
+	var wg1 sync.WaitGroup
+	wg1.Add(int(xLen * yLen))
+
+	tiles := make([][]Tile, yLen)
+	for y := uint64(0); y < yLen; y++ {
+		tiles[y] = make([]Tile, xLen)
+
+		for x := uint64(0); x < xLen; x++ {
+			xIndex := uint64(xStart + x)
+			yIndex := uint64(yStart + y)
+
+			xIndex, yIndex = WrapTileID(xIndex, yIndex, level)
+
+			go func(xIndex, yIndex uint64) {
+				tile, err := m.GetTile(mapID, xIndex, yIndex, level, format, highDPI)
+				if err != nil {
+					log.Printf("Error fetching tile: %s", err)
+				}
+				in <- tile
+				wg1.Done()
+			}(xIndex, yIndex)
+		}
+	}
+
+	go func() {
+		wg1.Wait()
+		close(in)
+	}()
+
+stitch:
+	for {
+		select {
+		case t, ok := <-in:
+			if !ok {
+				break stitch
+			}
+			tiles[t.Y-yStart][t.X-xStart] = *t
 		}
 	}
 
