@@ -27,7 +27,7 @@ const (
 func NewTile(x, y, level, size uint64, src image.Image) Tile {
 	// Convert image to RGBA
 	b := src.Bounds()
-	m := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+	m := image.NewNRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 	draw.Draw(m, m.Bounds(), src, b.Min, draw.Src)
 
 	return Tile{

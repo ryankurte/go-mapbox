@@ -135,6 +135,11 @@ func SaveImageJPG(img image.Image, file string) error {
 		return err
 	}
 
+	err = w.Flush()
+	if err != nil {
+		return err
+	}
+
 	f.Close()
 
 	return nil
@@ -150,6 +155,11 @@ func SaveImagePNG(img image.Image, file string) error {
 	w := bufio.NewWriter(f)
 
 	err = png.Encode(w, img)
+	if err != nil {
+		return err
+	}
+
+	err = w.Flush()
 	if err != nil {
 		return err
 	}
