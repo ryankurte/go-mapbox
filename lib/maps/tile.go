@@ -210,14 +210,14 @@ func (t *Tile) GetAltitude(loc base.Location) (float64, error) {
 	if err != nil {
 		return 0.0, err
 	}
-	p := t.Image.At(offsetX, offsetY).(color.RGBA)
+	p := t.Image.At(offsetX, offsetY).(color.NRGBA)
 	return PixelToHeight(p.R, p.G, p.B), nil
 }
 
 func (t *Tile) InterpolateAltitudes(loc1, loc2 base.Location) []float64 {
 	altitudes := make([]float64, 0)
 	t.InterpolateLocations(loc1, loc2, func(c color.Color) color.Color {
-		p := c.(color.RGBA)
+		p := c.(color.NRGBA)
 		alt := PixelToHeight(p.R, p.G, p.B)
 		altitudes = append(altitudes, alt)
 		return c
@@ -226,11 +226,11 @@ func (t *Tile) InterpolateAltitudes(loc1, loc2 base.Location) []float64 {
 }
 
 func (t *Tile) GetHighestAltitude() float64 {
-	p := t.Image.At(0, 0).(color.RGBA)
+	p := t.Image.At(0, 0).(color.NRGBA)
 	max := PixelToHeight(p.R, p.G, p.B)
 	for y := 0; y < t.Image.Bounds().Dy(); y++ {
 		for x := 0; x < t.Image.Bounds().Dx(); x++ {
-			p := t.Image.At(x, y).(color.RGBA)
+			p := t.Image.At(x, y).(color.NRGBA)
 			alt := PixelToHeight(p.R, p.G, p.B)
 			if alt > max {
 				max = alt
@@ -241,11 +241,11 @@ func (t *Tile) GetHighestAltitude() float64 {
 }
 
 func (t *Tile) FlattenAltitudes(maxHeight float64) Tile {
-	img := image.NewRGBA(t.Image.Bounds())
+	img := image.NewNRGBA(t.Image.Bounds())
 
 	for y := 0; y < t.Image.Bounds().Dy(); y++ {
 		for x := 0; x < t.Image.Bounds().Dx(); x++ {
-			p := t.Image.At(x, y).(color.RGBA)
+			p := t.Image.At(x, y).(color.NRGBA)
 			alt := uint8(PixelToHeight(p.R, p.G, p.B) / maxHeight * 255)
 			img.Set(x, y, color.RGBA{R: alt, G: alt, B: alt, A: 255})
 		}
