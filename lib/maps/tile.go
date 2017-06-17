@@ -204,6 +204,23 @@ func (t *Tile) DrawLine(loc1, loc2 base.Location, c color.Color) {
 	})
 }
 
+func (t *Tile) DrawPoint(loc base.Location, size uint64, c color.Color) error {
+	x, y := MercatorLocationToPixel(loc.Latitude, loc.Longitude, t.Level, t.Size)
+	offsetX, offsetY, err := t.translateGlobalToLocalXY(int(x), int(y))
+	if err != nil {
+		return err
+	}
+	img := t.Image.(draw.Image)
+
+	for x := uint64(0); x < size; x++ {
+		for y := uint64(0); y < size; y++ {
+			img.Set(offsetX+int(x-size/2), offsetY+int(y-size/2), c)
+		}
+	}
+
+	return nil
+}
+
 func (t *Tile) GetAltitude(loc base.Location) (float64, error) {
 	x, y := MercatorLocationToPixel(loc.Latitude, loc.Longitude, t.Level, t.Size)
 	offsetX, offsetY, err := t.translateGlobalToLocalXY(int(x), int(y))
