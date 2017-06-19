@@ -27,7 +27,7 @@ func TestMaps(t *testing.T) {
 	mapBox := NewMapbox(token)
 
 	// Map API
-	_, _, err := mapBox.Maps.GetTile(maps.MapIDSatellite, 1, 0, 1, maps.MapFormatJpg90, true)
+	_, err := mapBox.Maps.GetTile(maps.MapIDSatellite, 1, 0, 1, maps.MapFormatJpg90, true)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()

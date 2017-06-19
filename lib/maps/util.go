@@ -11,29 +11,25 @@ package maps
 
 import (
 	"bufio"
+	"bytes"
 	"image"
 	"image/draw"
 	"image/jpeg"
 	"image/png"
 	"io/ioutil"
 	"os"
-)
 
-import (
-	"bytes"
-	"github.com/paulmach/go.geo"
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
 // LocationToTileID converts a lat/lon location into a tile ID
-func LocationToTileID(loc base.Location, level uint64) (int64, int64) {
-	x, y := geo.ScalarMercator.Project(loc.Longitude, loc.Latitude, level)
-	return int64(x), int64(y)
+func LocationToTileID(loc base.Location, level uint64) (uint64, uint64) {
+	return MercatorLocationToTileID(loc.Latitude, loc.Longitude, level, 256)
 }
 
 // TileIDToLocation converts a tile ID to a lat/lon location
-func TileIDToLocation(x, y, level uint64) base.Location {
-	lat, lng := geo.ScalarMercator.Inverse(x, y, level)
+func TileIDToLocation(x, y float64, level uint64) base.Location {
+	lat, lng := MercatorPixelToLocation(x, y, level, 256)
 	return base.Location{
 		Latitude:  lat,
 		Longitude: lng,
@@ -51,11 +47,11 @@ func WrapTileID(x, y, level uint64) (uint64, uint64) {
 }
 
 // GetEnclosingTileIDs fetches a pair of tile IDs enclosing the provided pair of points
-func GetEnclosingTileIDs(a, b base.Location, level uint64) (int64, int64, int64, int64) {
+func GetEnclosingTileIDs(a, b base.Location, level uint64) (uint64, uint64, uint64, uint64) {
 	aX, aY := LocationToTileID(a, level)
 	bX, bY := LocationToTileID(b, level)
 
-	var xStart, xEnd, yStart, yEnd int64
+	var xStart, xEnd, yStart, yEnd uint64
 	if bX >= aX {
 		xStart = aX
 		xEnd = bX
@@ -77,10 +73,10 @@ func GetEnclosingTileIDs(a, b base.Location, level uint64) (int64, int64, int64,
 
 // StitchTiles combines a 2d array of image tiles into a single larger image
 // Note that all images must have the same dimensions for this to work
-func StitchTiles(images [][]image.Image, config image.Config) image.Image {
+func StitchTiles(images [][]Tile) Tile {
 
-	imgX := config.Width
-	imgY := config.Height
+	imgX := images[0][0].Image.Bounds().Dx()
+	imgY := images[0][0].Image.Bounds().Dy()
 
 	xSize := imgX * len(images[0])
 	ySize := imgY * len(images)
@@ -95,7 +91,7 @@ func StitchTiles(images [][]image.Image, config image.Config) image.Image {
 		}
 	}
 
-	return stitched
+	return NewTile(images[0][0].X, images[0][0].Y, images[0][0].Level, images[0][0].Size, stitched)
 }
 
 // LoadImage loads an image from a file
@@ -109,7 +105,8 @@ func LoadImage(file string) (image.Image, *image.Config, error) {
 	data, err := ioutil.ReadAll(r)
 	f.Close()
 
-	cfg, _, err := image.DecodeConfig(bytes.NewReader(data))
+	cfg := image.Config{}
+	cfg, _, err = image.DecodeConfig(bytes.NewReader(data))
 	if err != nil {
 		f.Close()
 		return nil, nil, err
@@ -138,6 +135,11 @@ func SaveImageJPG(img image.Image, file string) error {
 		return err
 	}
 
+	err = w.Flush()
+	if err != nil {
+		return err
+	}
+
 	f.Close()
 
 	return nil
@@ -157,7 +159,27 @@ func SaveImagePNG(img image.Image, file string) error {
 		return err
 	}
 
+	err = w.Flush()
+	if err != nil {
+		return err
+	}
+
 	f.Close()
 
 	return nil
+}
+
+// PixelToHeight Converts a pixel to a height value for mapbox terrain tiles
+// Equation from https://www.mapbox.com/blog/terrain-rgb/
+func PixelToHeight(r, g, b uint8) float64 {
+	R, G, B := float64(r), float64(g), float64(b)
+	return -10000 + ((R*256*256 + G*256 + B) * 0.1)
+}
+
+func HeightToPixel(alt float64) (uint8, uint8, uint8) {
+	increments := int((alt + 10000) / 0.1)
+	b := uint8((increments >> 0) % 0xFF)
+	g := uint8((increments >> 8) % 0xFF)
+	r := uint8((increments >> 16) % 0xFF)
+	return r, g, b
 }
