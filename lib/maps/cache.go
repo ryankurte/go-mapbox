@@ -51,6 +51,7 @@ func (fc *FileCache) Save(mapID MapID, x, y, level uint64, format MapFormat, hig
 		return nil
 	}
 
+	// TODO: cannot currently save pngraw
 	if strings.Contains(string(format), "png") {
 		return SaveImagePNG(img, path)
 	}
@@ -66,6 +67,11 @@ func (fc *FileCache) Save(mapID MapID, x, y, level uint64, format MapFormat, hig
 func (fc *FileCache) Fetch(mapID MapID, x, y, level uint64, format MapFormat, highDPI bool) (image.Image, *image.Config, error) {
 	name := fc.getName(mapID, x, y, level, format, highDPI)
 	path := fmt.Sprintf("%s/%s", fc.basePath, name)
+
+	// TODO: work out how to load raw png files :-/
+	if format == MapFormatPngRaw {
+		return nil, nil, nil
+	}
 
 	if _, err := os.Stat(path); err != nil {
 		return nil, nil, nil

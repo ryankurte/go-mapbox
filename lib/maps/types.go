@@ -1,7 +1,9 @@
 package maps
 
+// MapID selects which map to fetch from the API
 type MapID string
 
+// Map IDs
 const (
 	MapIDStreets          MapID = "mapbox.streets"
 	MapIDLight            MapID = "mapbox.light"
@@ -20,8 +22,10 @@ const (
 	MapIDTerrainRGB       MapID = "mapbox.terrain-rgb"
 )
 
+// MapFormat specifies the format in which to return the map tiles
 type MapFormat string
 
+// Map formats
 const (
 	MapFormatPng        MapFormat = "png"    // true color PNG
 	MapFormatPng32      MapFormat = "png32"  // 32 color indexed PNG

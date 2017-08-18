@@ -10,12 +10,12 @@
 package maps
 
 import (
+	"fmt"
 	"os"
 	"testing"
-)
 
-import (
-	"fmt"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
@@ -34,39 +34,25 @@ func TestMaps(t *testing.T) {
 
 	t.Run("Can fetch map tiles as png", func(t *testing.T) {
 
-		img, _, err := maps.GetTile(MapIDStreets, 1, 0, 1, MapFormatPng, true)
-
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		img, err := maps.GetTile(MapIDStreets, 1, 0, 1, MapFormatPng, true)
+		assert.Nil(t, err)
 
 		err = SaveImagePNG(img, "/tmp/go-mapbox-test.png")
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		assert.Nil(t, err)
 	})
 
 	t.Run("Can fetch map tiles as jpeg", func(t *testing.T) {
 
-		img, _, err := maps.GetTile(MapIDSatellite, 1, 0, 1, MapFormatJpg90, true)
-
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		img, err := maps.GetTile(MapIDSatellite, 1, 0, 1, MapFormatJpg90, true)
+		assert.Nil(t, err)
 
 		err = SaveImageJPG(img, "/tmp/go-mapbox-test.jpg")
-		if err != nil {
-			t.Error(err)
-			t.FailNow()
-		}
+		assert.Nil(t, err)
 	})
 
 	t.Run("Can fetch terrain RGB tiles", func(t *testing.T) {
 
-		img, _, err := maps.GetTile(MapIDTerrainRGB, 1, 0, 1, MapFormatPngRaw, true)
+		img, err := maps.GetTile(MapIDTerrainRGB, 1, 0, 1, MapFormatPngRaw, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
@@ -84,7 +70,7 @@ func TestMaps(t *testing.T) {
 		locA := base.Location{-45.942805, 166.568500}
 		locB := base.Location{-34.2186101, 183.4015517}
 
-		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
+		images, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
 
 		if err != nil {
 			t.Error(err)
@@ -97,7 +83,7 @@ func TestMaps(t *testing.T) {
 			}
 		}
 
-		img := StitchTiles(images, configs[0][0])
+		img := StitchTiles(images)
 
 		err = SaveImageJPG(img, "/tmp/go-mapbox-stitch.jpg")
 		if err != nil {
@@ -120,12 +106,12 @@ func TestMaps(t *testing.T) {
 
 		maps.SetCache(cache)
 
-		images, configs, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
+		images, err := maps.GetEnclosingTiles(MapIDSatellite, locA, locB, 6, MapFormatJpg90, true)
 		if err != nil {
 			t.Error(err)
 			t.FailNow()
 		}
-		img := StitchTiles(images, configs[0][0])
+		img := StitchTiles(images)
 
 		err = SaveImageJPG(img, "/tmp/go-mapbox-stitch2.jpg")
 		if err != nil {
