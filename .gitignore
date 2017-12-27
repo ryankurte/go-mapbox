@@ -1,1 +1,7 @@
 setenv.sh
+
+*.jpg
+*.png
+*.svg
+*.json
+coverage.txt
