@@ -12,6 +12,7 @@ package base
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -95,14 +96,31 @@ func (b *Base) QueryRequest(query string, v *url.Values) (*http.Response, error)
 // QueryBase Query the mapbox API and fill the provided instance with the returned JSON
 // TODO: Rename this
 func (b *Base) QueryBase(query string, v *url.Values, inst interface{}) error {
-
+	// Make request
 	resp, err := b.QueryRequest(query, v)
+	if err != nil && resp.StatusCode != http.StatusBadRequest {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Read body into buffer
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 
-	defer resp.Body.Close()
-	err = json.NewDecoder(resp.Body).Decode(&inst)
+	// Handle bad requests with messages
+	if resp.StatusCode == http.StatusBadRequest {
+		apiMessage := MapboxApiMessage{}
+		messageErr := json.Unmarshal(body, &apiMessage)
+		if messageErr == nil {
+			return fmt.Errorf("api error: %s", apiMessage.Message)
+		}
+		return fmt.Errorf("Bad Request (400) - no message")
+	}
+
+	// Attempt to decode body into inst type
+	err = json.Unmarshal(body, &inst)
 	if err != nil {
 		return err
 	}
