@@ -19,7 +19,7 @@ import (
 const (
 	apiName    = "surface"
 	apiVersion = "v4"
-	mapId      = "mapbox.mapbox-terrain-v2"
+	mapId      = "mapbox.mapbox-terrain-v1"
 )
 
 // Surface api wrapper instance
