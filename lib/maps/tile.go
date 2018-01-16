@@ -12,7 +12,7 @@ import (
 
 // Tile is a wrapper around an image that includes positioning data
 type Tile struct {
-	image.Image
+	draw.Image
 	Level uint64 // Tile zoom level
 	Size  uint64 // Tile size
 	X, Y  uint64 // Tile X and Y postions (Web Mercurator projection)
