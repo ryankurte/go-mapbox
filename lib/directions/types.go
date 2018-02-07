@@ -98,7 +98,7 @@ type Lane struct {
 // StepManeuver
 // https://www.mapbox.com/api-documentation/#stepmaneuver-object
 type StepManeuver struct {
-	Locaton       []float64
+	Location       []float64
 	BearingBefore float64
 	BearingAfter  float64
 	Instruction   string
