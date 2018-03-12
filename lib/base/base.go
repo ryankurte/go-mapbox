@@ -11,6 +11,7 @@ package base
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -32,12 +33,16 @@ type Base struct {
 }
 
 // NewBase Create a new API base instance
-func NewBase(token string) *Base {
+func NewBase(token string) (*Base, error) {
+	if token == "" {
+		return nil, errors.New("Mapbox API token not found")
+	}
+
 	b := &Base{}
 
 	b.token = token
 
-	return b
+	return b, nil
 }
 
 // SetDebug enables debug output for API calls
