@@ -11,9 +11,10 @@ package directions
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/google/go-querystring/query"
 	"github.com/ryankurte/go-mapbox/lib/base"
-	"strings"
 )
 
 const (

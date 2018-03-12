@@ -34,11 +34,15 @@ type Mapbox struct {
 }
 
 // NewMapbox Create a new mapbox API instance
-func NewMapbox(token string) *Mapbox {
+func NewMapbox(token string) (*Mapbox, error) {
 	m := &Mapbox{}
 
 	// Create base instance
-	m.base = base.NewBase(token)
+	base, err := base.NewBase(token)
+	if err != nil {
+		return nil, err
+	}
+	m.base = base
 
 	// Bind modules
 	m.Maps = maps.NewMaps(m.base)
@@ -47,5 +51,5 @@ func NewMapbox(token string) *Mapbox {
 	m.DirectionsMatrix = directionsmatrix.NewDirectionsMatrix(m.base)
 	m.MapMatching = mapmatching.NewMapMaptching(m.base)
 
-	return m
+	return m, nil
 }

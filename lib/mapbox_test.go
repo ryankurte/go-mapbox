@@ -16,18 +16,15 @@ import (
 )
 
 func TestMaps(t *testing.T) {
-	// Fetch token from somewhere
-	token := os.Getenv("MAPBOX_TOKEN")
-	if token == "" {
-		t.Errorf("No token found")
+	// Create new mapbox instance
+	mapBox, err := NewMapbox(os.Getenv("MAPBOX_TOKEN"))
+	if err != nil {
+		t.Error(err)
 		t.FailNow()
 	}
 
-	// Create new mapbox instance
-	mapBox := NewMapbox(token)
-
 	// Map API
-	_, err := mapBox.Maps.GetTile(maps.MapIDSatellite, 1, 0, 1, maps.MapFormatJpg90, true)
+	_, err = mapBox.Maps.GetTile(maps.MapIDSatellite, 1, 0, 1, maps.MapFormatJpg90, true)
 	if err != nil {
 		t.Error(err)
 		t.FailNow()
