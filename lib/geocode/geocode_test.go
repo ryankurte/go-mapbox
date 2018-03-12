@@ -22,13 +22,11 @@ import (
 
 func TestGeocoder(t *testing.T) {
 
-	token := os.Getenv("MAPBOX_TOKEN")
-	if token == "" {
-		t.Error("Mapbox API token not found")
+	b, err := base.NewBase(os.Getenv("MAPBOX_TOKEN"))
+	if err != nil {
+		t.Error(err)
 		t.FailNow()
 	}
-
-	b := base.NewBase(token)
 
 	geocode := NewGeocode(b)
 
