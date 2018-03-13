@@ -78,13 +78,20 @@ func NewDirections(base *base.Base) *Directions {
 
 // RequestOpts request options for directions api
 type RequestOpts struct {
-	Alternatives     bool          `url:"alternatives,omitempty"`
-	Geometries       *GeometryType `url:"geometries,omitempty"`
-	Overview         *OverviewType `url:"overview,omitempty"`
-	Radiuses         string        `url:"radiuses,omitempty"`
-	Steps            bool          `url:"steps,omitempty"`
-	ContinueStraight bool          `url:"continue_straight,omitempty"`
-	Bearings         string        `url:"bearings,omitempty"`
+	Alternatives       bool          `url:"alternatives,omitempty"`
+	Geometries         *GeometryType `url:"geometries,omitempty"`
+	Overview           *OverviewType `url:"overview,omitempty"`
+	Radiuses           string        `url:"radiuses,omitempty"`
+	Steps              bool          `url:"steps,omitempty"`
+	ContinueStraight   bool          `url:"continue_straight,omitempty"`
+	Bearings           string        `url:"bearings,omitempty"`
+	Annotations        string        `url:"annotations,omitempty"`
+	Language           string        `url:"language,omitempty"`
+	Exclude            string        `url:"exclude,omitempty"`
+	RoundaboutExits    bool          `url:"roundabout_exits,omitempty"`
+	VoiceInstructions  bool          `url:"voice_instructions,omitempty"`
+	BannerInstructions bool          `url:"banner_instructions,omitempty"`
+	VoiceUnits         string        `url:"voice_units,omitempty"`
 }
 
 // SetRadiuses sets radiuses for the maximum distance any coordinate can move when snapped to  nearby road segment.
