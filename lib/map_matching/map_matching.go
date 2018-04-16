@@ -13,8 +13,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/JayBusch/go-mapbox/lib/base"
 	"github.com/google/go-querystring/query"
-	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
 const (
