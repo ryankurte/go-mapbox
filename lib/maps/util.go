@@ -19,7 +19,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ryankurte/go-mapbox/lib/base"
+	"github.com/JayBusch/go-mapbox/lib/base"
 )
 
 // LocationToTileID converts a lat/lon location into a tile ID
