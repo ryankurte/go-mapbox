@@ -39,6 +39,15 @@ func NewTile(x, y, level, size uint64, src image.Image) Tile {
 	}
 }
 
+// Clone helper clones a tile instance with a new base image
+func (t *Tile) Clone() Tile {
+	n := *t
+	b := t.Bounds()
+	n.Image = image.NewRGBA(b)
+	draw.Draw(n.Image, b, t, b.Min, draw.Src)
+	return n
+}
+
 // LocationToPixel translates a global location to a pixel on the tile
 func (t *Tile) LocationToPixel(loc base.Location) (float64, float64, error) {
 	x, y := MercatorLocationToPixel(loc.Latitude, loc.Longitude, t.Level, t.Size)
