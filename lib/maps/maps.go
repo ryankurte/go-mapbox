@@ -20,7 +20,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/ryankurte/go-mapbox/lib/base"
+	"github.com/JayBusch/go-mapbox/lib/base"
 	"sync"
 )
 
