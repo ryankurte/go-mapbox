@@ -24,6 +24,7 @@ Because Travis-CI does not expose the build environment to untrusted branches (i
 - [X] Maps
 - [ ] Static
 - [ ] Datasets
+- [ ] Surface
 
 ## Examples
 
@@ -100,8 +101,8 @@ directions, err := mapBox.Directions.GetDirections(locs, directions.RoutingCycli
 - [lib/maps](lib/maps/) contains the maps API module
 - [lib/directions](lib/directions/) contains the directions API module
 - [lib/geocode](lib/geocode/) contains the geocoding API module
+- [lib/surface](lib/surface/) contains the surface API module
 
 ---
 
 If you have any questions, comments, or suggestions, feel free to open an issue or a pull request.
-
