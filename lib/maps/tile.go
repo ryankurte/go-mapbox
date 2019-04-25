@@ -54,10 +54,10 @@ func (t *Tile) LocationToPixel(loc base.Location) (float64, float64, error) {
 	offsetX, offsetY := x-float64(t.X*t.Size), y-float64(t.Y*t.Size)
 
 	if xMax := float64(t.Image.Bounds().Max.X); (offsetX < 0) || (offsetX > xMax) {
-		return 0, 0, fmt.Errorf("Tile LocationToPixel error: global X offset not within tile space (x: %d max: %d)", offsetX, int(xMax))
+		return 0, 0, fmt.Errorf("Tile LocationToPixel error: global X offset not within tile space (x: %.2f max: %d)", offsetX, int(xMax))
 	}
 	if yMax := float64(t.Image.Bounds().Max.Y); (offsetY < 0) || (offsetY > yMax) {
-		return 0, 0, fmt.Errorf("Tile LocationToPixel error: global Y offset not within tile space (y: %d max: %d)", offsetY, int(yMax))
+		return 0, 0, fmt.Errorf("Tile LocationToPixel error: global Y offset not within tile space (y: %.2f max: %d)", offsetY, int(yMax))
 	}
 
 	return offsetX, offsetY, nil
