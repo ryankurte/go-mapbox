@@ -103,7 +103,7 @@ func (b *Base) QueryRequest(query string, v *url.Values) (*http.Response, error)
 func (b *Base) QueryBase(query string, v *url.Values, inst interface{}) error {
 	// Make request
 	resp, err := b.QueryRequest(query, v)
-	if err != nil && resp.StatusCode != http.StatusBadRequest {
+	if err != nil && (resp == nil || resp.StatusCode != http.StatusBadRequest) {
 		return err
 	}
 	defer resp.Body.Close()
