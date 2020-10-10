@@ -12,15 +12,16 @@ package geocode
 import (
 	"fmt"
 	"strings"
-
+	
 	"github.com/google/go-querystring/query"
 	"github.com/ryankurte/go-mapbox/lib/base"
 )
 
 const (
-	apiName    = "geocoding"
-	apiVersion = "v5"
-	apiMode    = "mapbox.places"
+	apiName          = "geocoding"
+	apiVersion       = "v5"
+	apiMode          = "mapbox.places"
+	apiModePermanent = "mapbox.places-permanent"
 )
 
 // Type defines geocode location response types
@@ -65,6 +66,8 @@ type ForwardRequestOpts struct {
 	Autocomplete bool             `url:"autocomplete,omitempty"`
 	BBox         base.BoundingBox `url:"bbox,omitempty"`
 	Limit        uint             `url:"limit,omitempty"`
+	FuzzyMatch   bool             `url:"fuzzyMatch,omitempty"`
+	Routing      bool             `url:"routing,omitempty"`
 }
 
 // ForwardResponse is the response from a forward geocode lookup
@@ -75,19 +78,22 @@ type ForwardResponse struct {
 
 // Forward geocode lookup
 // Finds locations from a place name
-func (g *Geocode) Forward(place string, req *ForwardRequestOpts) (*ForwardResponse, error) {
-
+func (g *Geocode) Forward(place string, req *ForwardRequestOpts, permanent ...bool) (*ForwardResponse, error) {
+	
 	v, err := query.Values(req)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	resp := ForwardResponse{}
-
+	
 	queryString := strings.Replace(place, " ", "+", -1)
-
-	err = g.base.Query(apiName, apiVersion, apiMode, fmt.Sprintf("%s.json", queryString), &v, &resp)
-
+	if len(permanent) > 0 && permanent[0] {
+		err = g.base.Query(apiName, apiVersion, apiModePermanent, fmt.Sprintf("%s.json", queryString), &v, &resp)
+	} else {
+		err = g.base.Query(apiName, apiVersion, apiMode, fmt.Sprintf("%s.json", queryString), &v, &resp)
+	}
+	
 	return &resp, err
 }
 
@@ -106,17 +112,17 @@ type ReverseResponse struct {
 // Reverse geocode lookup
 // Finds place names from a location
 func (g *Geocode) Reverse(loc *base.Location, req *ReverseRequestOpts) (*ReverseResponse, error) {
-
+	
 	v, err := query.Values(req)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	resp := ReverseResponse{}
-
+	
 	queryString := fmt.Sprintf("%f,%f.json", loc.Longitude, loc.Latitude)
-
+	
 	err = g.base.Query(apiName, apiVersion, apiMode, queryString, &v, &resp)
-
+	
 	return &resp, err
 }
