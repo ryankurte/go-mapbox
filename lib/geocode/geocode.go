@@ -63,11 +63,13 @@ type ForwardRequestOpts struct {
 	Country      string           `url:"country,omitempty"`
 	Proximity    []float64        `url:"proximity,omitempty"`
 	Types        []Type           `url:"types,omitempty"`
+	Language     string           `url:"language,omitempty"`
 	Autocomplete bool             `url:"autocomplete,omitempty"`
 	BBox         base.BoundingBox `url:"bbox,omitempty"`
 	Limit        uint             `url:"limit,omitempty"`
 	FuzzyMatch   bool             `url:"fuzzyMatch,omitempty"`
 	Routing      bool             `url:"routing,omitempty"`
+	worldview    string           `url:"worldview,omitempty"`
 }
 
 // ForwardResponse is the response from a forward geocode lookup
@@ -99,8 +101,13 @@ func (g *Geocode) Forward(place string, req *ForwardRequestOpts, permanent ...bo
 
 // ReverseRequestOpts request options fo reverse geocoding
 type ReverseRequestOpts struct {
-	Types []Type
-	Limit uint
+	Country     string
+	Language    string
+	ReverseMode string
+	Routing     bool
+	Types       []Type
+	Limit       uint
+	Worldview   string
 }
 
 // ReverseResponse is the response to a reverse geocode request
@@ -111,7 +118,7 @@ type ReverseResponse struct {
 
 // Reverse geocode lookup
 // Finds place names from a location
-func (g *Geocode) Reverse(loc *base.Location, req *ReverseRequestOpts) (*ReverseResponse, error) {
+func (g *Geocode) Reverse(loc *base.Location, req *ReverseRequestOpts, permanent ...bool) (*ReverseResponse, error) {
 
 	v, err := query.Values(req)
 	if err != nil {
@@ -122,7 +129,11 @@ func (g *Geocode) Reverse(loc *base.Location, req *ReverseRequestOpts) (*Reverse
 
 	queryString := fmt.Sprintf("%f,%f.json", loc.Longitude, loc.Latitude)
 
-	err = g.base.Query(apiName, apiVersion, apiMode, queryString, &v, &resp)
+	if len(permanent) > 0 && permanent[0] {
+		err = g.base.Query(apiName, apiVersion, apiModePermanent, queryString, &v, &resp)
+	} else {
+		err = g.base.Query(apiName, apiVersion, apiMode, queryString, &v, &resp)
+	}
 
 	return &resp, err
 }

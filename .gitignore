@@ -1,5 +1,6 @@
 setenv.sh
 
+.idea
 *.jpg
 *.png
 *.svg
