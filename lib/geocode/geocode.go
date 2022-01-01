@@ -101,13 +101,13 @@ func (g *Geocode) Forward(place string, req *ForwardRequestOpts, permanent ...bo
 
 // ReverseRequestOpts request options fo reverse geocoding
 type ReverseRequestOpts struct {
-	Country     string
-	Language    string
-	ReverseMode string
-	Routing     bool
-	Types       []Type
-	Limit       uint
-	Worldview   string
+	Country     string `url:"country,omitempty"`
+	Language    string `url:"language,omitempty"`
+	ReverseMode string `url:"reverse_mode,omitempty"`
+	Routing     bool   `url:"routing,omitempty"`
+	Types       []Type `url:"types,omitempty"`
+	Limit       uint   `url:"limit,omitempty"`
+	Worldview   string `url:"worldview,omitempty"`
 }
 
 // ReverseResponse is the response to a reverse geocode request

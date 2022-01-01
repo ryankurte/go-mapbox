@@ -54,8 +54,9 @@ func TestGeocoder(t *testing.T) {
 	t.Run("Can reverse geocode", func(t *testing.T) {
 		var reqOpt ReverseRequestOpts
 		reqOpt.Limit = 1
+		reqOpt.Language = "en"
 
-		loc := &base.Location{72.438939, 34.074122}
+		loc := &base.Location{35.68378042642364, 139.7717582719497}
 
 		res, err := geocode.Reverse(loc, &reqOpt)
 		if err != nil {
