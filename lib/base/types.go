@@ -28,28 +28,36 @@ type Context struct {
 	Text      string `json:"text"`
 	ShortCode string `json:"short_code"`
 	WikiData  string `json:"wikidata"`
+	Language  string `json:"language"`
 }
 
 type Properties struct {
-	Category string `json:"category"`
-	Tel      string `json:"tel"`
-	Wikidata string `json:"wikidata"`
-	Landmark bool   `json:"landmark"`
-	Maki     string `json:"short_code"`
+	Accuracy  string `json:"accuracy"`
+	Address   string `json:"address"`
+	Category  string `json:"category"`
+	Tel       string `json:"tel"`
+	Wikidata  string `json:"wikidata"`
+	Landmark  bool   `json:"landmark"`
+	Maki      string `json:"maki"`
+	ShortCode string `json:"short_code"`
 }
 
 type Feature struct {
-	ID         string      `json:"id"`
-	Type       string      `json:"type"`
-	Text       string      `json:"text"`
-	PlaceName  string      `json:"place_name"`
-	PlaceType  []string    `json:"place_type"`
-	Relevance  float64     `json:"relevance"`
-	Properties Properties  `json:"properties"`
-	BBox       BoundingBox `json:"bbox"`
-	Center     Point       `json:"center"`
-	Geometry   Geometry    `json:"geometry"`
-	Context    []Context   `json:"context"`
+	ID                string      `json:"id"`
+	Type              string      `json:"type"`
+	Text              string      `json:"text"`
+	PlaceName         string      `json:"place_name"`
+	PlaceType         []string    `json:"place_type"`
+	Relevance         float64     `json:"relevance"`
+	Address           string      `json:"address"`
+	Properties        Properties  `json:"properties"`
+	BBox              BoundingBox `json:"bbox"`
+	Center            Point       `json:"center"`
+	Geometry          Geometry    `json:"geometry"`
+	Context           []Context   `json:"context"`
+	MatchingText      string      `json:"matching_text"`
+	MatchingPlaceName string      `json:"matching_place_name"`
+	Language          string      `json:"language"`
 }
 
 type FeatureCollection struct {
